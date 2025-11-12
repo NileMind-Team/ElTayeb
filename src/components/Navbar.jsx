@@ -1,21 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  FaHome,
-  FaUserCircle,
-  FaChevronDown,
-  FaUser,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { FaHome, FaChevronDown, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axiosInstance from "../api/axiosInstance";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [userData, setUser] = useState({});
   const dropdownRef = useRef(null);
-  const isLoggedIn = localStorage.getItem("token");
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const isLoggedIn = !!localStorage.getItem("token");
   const links = [{ path: "/", label: "Home", icon: <FaHome /> }];
 
   const authLinks = [
@@ -47,12 +43,33 @@ const Navbar = () => {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Fetch user profile
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchProfile = async () => {
+      try {
+        const res = await axiosInstance.get("/api/Account/Profile");
+        if (res.status === 200) {
+          const fixedImageUrl = res.data.imageUrl
+            ? `https://nilefood.runasp.net/${res.data.imageUrl}`
+            : null;
+          setUser({ ...res.data, avatar: fixedImageUrl });
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      } finally {
+      }
+    };
+    fetchProfile();
+  }, [isLoggedIn]);
+
+  const getInitial = (name) => (!name ? "?" : name.charAt(0).toUpperCase());
 
   return (
     <nav className="bg-white/90 backdrop-blur-xl shadow-lg py-4 px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#E41E26]/20">
@@ -100,14 +117,23 @@ const Navbar = () => {
         {/* Auth Section */}
         <div className="relative" ref={dropdownRef}>
           {isLoggedIn ? (
-            // User is logged in - Show user menu
             <motion.div
               className="flex items-center gap-3 cursor-pointer"
               whileHover={{ scale: 1.05 }}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <div className="flex items-center gap-2 bg-gradient-to-r from-[#fff8e7] to-[#ffe5b4] px-4 py-2 rounded-xl border border-[#FDB913]/30">
-                <FaUserCircle className="text-[#E41E26] text-lg" />
+                {userData.avatar ? (
+                  <img
+                    src={userData.avatar}
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full object-cover border border-[#FDB913]/50"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#E41E26] text-white flex items-center justify-center font-semibold border border-[#FDB913]/50">
+                    {getInitial(userData.firstName)}
+                  </div>
+                )}
                 <span className="text-gray-700 font-medium">
                   {userData.firstName || "User"}
                 </span>
@@ -120,7 +146,6 @@ const Navbar = () => {
               </div>
             </motion.div>
           ) : (
-            // User is not logged in - Show auth dropdown
             <motion.div
               className="flex items-center gap-3 cursor-pointer"
               whileHover={{ scale: 1.05 }}
@@ -138,7 +163,6 @@ const Navbar = () => {
             </motion.div>
           )}
 
-          {/* Dropdown Menu */}
           <AnimatePresence>
             {isDropdownOpen && (
               <motion.div
@@ -149,7 +173,6 @@ const Navbar = () => {
                 className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-[#E41E26]/20 overflow-hidden z-50"
               >
                 {isLoggedIn ? (
-                  // User dropdown menu
                   <div className="p-2">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm text-gray-600">Welcome back!</p>
@@ -161,7 +184,6 @@ const Navbar = () => {
                       </p>
                     </div>
 
-                    {/* Profile Button */}
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -175,7 +197,6 @@ const Navbar = () => {
                       </button>
                     </motion.div>
 
-                    {/* Logout Button */}
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -190,7 +211,6 @@ const Navbar = () => {
                     </motion.div>
                   </div>
                 ) : (
-                  // Auth dropdown menu
                   <div className="p-2">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm text-gray-600">Join Chicken One</p>
