@@ -32,7 +32,7 @@ const Home = () => {
   const [isAdminOrRestaurantOrBranch, setIsAdminOrRestaurantOrBranch] =
     useState(false);
   const [loading, setLoading] = useState(true);
-  const [productsLoading, setProductsLoading] = useState(false); // Loading جديد للـ Products فقط
+  const [productsLoading, setProductsLoading] = useState(false);
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
   const [categories, setCategories] = useState([
     { id: "all", name: "جميع العناصر" },
