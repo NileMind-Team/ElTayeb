@@ -348,11 +348,12 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         >
                           <button
                             onClick={() => handleAuthClick(link.path)}
-                            className={`w-full text-left flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-lg ${
+                            className={`w-full text-right flex items-center justify-between gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-lg ${
                               location.pathname === link.path
                                 ? "bg-gradient-to-r from-[#fff8e7] to-[#ffe5b4] dark:from-gray-700 dark:to-gray-600 text-[#E41E26] dark:text-[#FDB913]"
                                 : ""
                             }`}
+                            dir="rtl"
                           >
                             <span>{link.label}</span>
                           </button>
@@ -436,12 +437,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               <div className="p-4">
                 <div className="space-y-1">
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleHomeClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaHome className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -453,17 +455,18 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   {isAdmin && (
                     <>
                       <div className="border-t border-gray-200 dark:border-gray-700 my-4 pt-4">
-                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2 mb-2">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2 mb-2 text-right">
                           لوحة الإدارة
                         </p>
 
                         <motion.div
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02, x: -4 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <button
                             onClick={handleAdminUsersClick}
-                            className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
                           >
                             <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                               <FaUsers className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -473,12 +476,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </motion.div>
 
                         <motion.div
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02, x: -4 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <button
                             onClick={handleAdminBranchesClick}
-                            className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
                           >
                             <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                               <FaBuilding className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -488,12 +492,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </motion.div>
 
                         <motion.div
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02, x: -4 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <button
                             onClick={handleDeliveryCostClick}
-                            className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
                           >
                             <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                               <FaMoneyBillWave className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -503,12 +508,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </motion.div>
 
                         <motion.div
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02, x: -4 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <button
                             onClick={handleCouponsClick}
-                            className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
                           >
                             <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                               <FaTag className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -518,12 +524,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </motion.div>
 
                         <motion.div
-                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileHover={{ scale: 1.02, x: -4 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <button
                             onClick={handleCitiesClick}
-                            className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
                           >
                             <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                               <FaCity className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -536,12 +543,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   )}
 
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleProfileClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaUser className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -551,12 +559,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   </motion.div>
 
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleOrdersClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaClipboardList className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -566,12 +575,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   </motion.div>
 
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleCartClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaShoppingCart className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -581,12 +591,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   </motion.div>
 
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleAddressesClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaMapMarkerAlt className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -596,12 +607,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   </motion.div>
 
                   <motion.div
-                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileHover={{ scale: 1.02, x: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={handleReviewsClick}
-                      className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                      dir="rtl"
                     >
                       <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                         <FaStar className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
@@ -612,12 +624,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
                   <div className="border-t border-gray-200 dark:border-gray-700 my-4 pt-4">
                     <motion.div
-                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileHover={{ scale: 1.02, x: -4 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <button
                         onClick={handleDeleteAccount}
-                        className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-red-200 dark:hover:border-red-800"
+                        className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-red-200 dark:hover:border-red-800"
+                        dir="rtl"
                       >
                         <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                           <FaTrash className="text-red-500 dark:text-red-400 text-lg" />
@@ -627,12 +640,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                     </motion.div>
 
                     <motion.div
-                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileHover={{ scale: 1.02, x: -4 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-[#E41E26] dark:hover:text-[#FDB913] transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#E41E26]/30 dark:hover:border-[#FDB913]/30"
+                        className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-[#E41E26] dark:hover:text-[#FDB913] transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#E41E26]/30 dark:hover:border-[#FDB913]/30"
+                        dir="rtl"
                       >
                         <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
                           <FaSignOutAlt className="text-[#E41E26] dark:text-[#FDB913] text-lg" />

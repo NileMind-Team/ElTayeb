@@ -24,8 +24,8 @@ export default function Cart() {
   const [discount, setDiscount] = useState(0);
   const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [deliveryFee] = useState(15);
+  const [hasAddress, setHasAddress] = useState(true);
 
-  // Available delivery times for "later" option
   const deliveryTimes = [
     "12:00 PM - 1:00 PM",
     "1:00 PM - 2:00 PM",
@@ -38,7 +38,6 @@ export default function Cart() {
     "8:00 PM - 9:00 PM",
   ];
 
-  // Available coupon codes
   const validCoupons = [
     { code: "WELCOME10", discount: 10 },
     { code: "FIRSTORDER", discount: 15 },
@@ -46,7 +45,6 @@ export default function Cart() {
     { code: "SAVE25", discount: 25 },
   ];
 
-  // Sample cart data for demonstration - ALWAYS USED FOR DEMO
   const sampleCartItems = [
     {
       id: 1,
@@ -101,6 +99,8 @@ export default function Cart() {
   useEffect(() => {
     localStorage.removeItem("chickenOneCart");
     setCartItems(sampleCartItems);
+
+    setHasAddress(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateQuantity = (id, newQuantity) => {
@@ -210,6 +210,36 @@ export default function Cart() {
   };
 
   const handleCheckout = () => {
+    if (!hasAddress) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Delivery Address",
+        html: `
+          <div class="text-center">
+            <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+              </svg>
+            </div>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">You haven't added any delivery address yet. Please add an address to continue with your order.</p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Add Address",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#E41E26",
+        cancelButtonColor: "#6B7280",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl dark:bg-gray-800 dark:text-white",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/addresses");
+        }
+      });
+      return;
+    }
+
     if (cartItems.length === 0) {
       Swal.fire({
         icon: "warning",
