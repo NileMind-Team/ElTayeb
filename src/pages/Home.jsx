@@ -22,6 +22,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -240,12 +242,14 @@ const Home = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      Swal.fire({
-        icon: "warning",
-        title: "يجب تسجيل الدخول",
-        text: "يجب تسجيل الدخول لإضافة المنتجات إلى المفضلة",
-        timer: 2000,
-        showConfirmButton: false,
+      toast.warning("يجب تسجيل الدخول لإضافة المنتجات إلى المفضلة", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
       });
       return;
     }
@@ -259,12 +263,14 @@ const Home = () => {
         await axiosInstance.delete(`/api/Favorites/Delete/${favoriteItem.id}`);
         setFavorites(favorites.filter((fav) => fav.menuItemId !== product.id));
 
-        Swal.fire({
-          icon: "success",
-          title: "تم الإزالة من المفضلة",
-          text: `تم إزالة ${product.name} من المفضلة`,
-          timer: 1500,
-          showConfirmButton: false,
+        toast.success(`تم إزالة ${product.name} من المفضلة`, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
         });
       } else {
         // Add to favorites
@@ -276,22 +282,26 @@ const Home = () => {
         const response = await axiosInstance.get("/api/Favorites/GetAll");
         setFavorites(response.data);
 
-        Swal.fire({
-          icon: "success",
-          title: "تم الإضافة إلى المفضلة",
-          text: `تم إضافة ${product.name} إلى المفضلة`,
-          timer: 1500,
-          showConfirmButton: false,
+        toast.success(`تم إضافة ${product.name} إلى المفضلة`, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
         });
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في تحديث المفضلة",
-        timer: 2000,
-        showConfirmButton: false,
+      toast.error("فشل في تحديث المفضلة", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
       });
     }
   };
@@ -739,6 +749,21 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 font-sans relative overflow-x-hidden transition-colors duration-300">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={true}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{ zIndex: 9999 }}
+      />
+
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute -left-20 -top-20 w-80 h-80 bg-gradient-to-r from-[#E41E26]/10 to-[#FDB913]/10 dark:from-[#E41E26]/5 dark:to-[#FDB913]/5 rounded-full blur-3xl"></div>
         <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-r from-[#FDB913]/10 to-[#E41E26]/10 dark:from-[#FDB913]/5 dark:to-[#E41E26]/5 rounded-full blur-3xl"></div>
