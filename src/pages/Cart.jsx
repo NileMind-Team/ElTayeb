@@ -12,9 +12,16 @@ import {
   FaTag,
   FaCheck,
   FaTimes,
+  FaEdit,
+  FaFire,
+  FaStickyNote,
+  FaInfoCircle,
+  FaSave,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -27,6 +34,17 @@ export default function Cart() {
   const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [deliveryFee] = useState(15);
   const [hasAddress, setHasAddress] = useState(true);
+  const [showProductDetailsModal, setShowProductDetailsModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productDetails, setProductDetails] = useState(null);
+  const [productAddons, setProductAddons] = useState([]);
+  const [selectedAddons, setSelectedAddons] = useState({});
+  const [productQuantity, setProductQuantity] = useState(1);
+  const [additionalNotes, setAdditionalNotes] = useState("");
+  const [updatingCart, setUpdatingCart] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const notesModalRef = React.useRef(null);
+  const productDetailsModalRef = React.useRef(null);
 
   const deliveryTimes = [
     "12:00 PM - 1:00 PM",
@@ -46,6 +64,35 @@ export default function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notesModalRef.current &&
+        !notesModalRef.current.contains(event.target)
+      ) {
+        handleCloseNotesModal();
+      }
+
+      if (
+        showProductDetailsModal &&
+        productDetailsModalRef.current &&
+        !productDetailsModalRef.current.contains(event.target)
+      ) {
+        closeProductDetailsModal();
+      }
+    };
+
+    if (showNotesModal || showProductDetailsModal) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [showNotesModal, showProductDetailsModal]);
+
   const fetchCartItems = async () => {
     try {
       setLoading(true);
@@ -58,24 +105,49 @@ export default function Cart() {
 
       const response = await axiosInstance.get("/api/CartItems/GetAll");
 
-      const transformedItems = response.data.map((item) => ({
-        id: item.id,
-        name: item.menuItem?.name || "Product",
-        category: item.menuItem?.category?.name?.toLowerCase() || "meals",
-        price: item.menuItem?.basePrice || 0,
-        image: item.menuItem?.imageUrl
-          ? `https://restaurant-template.runasp.net/${item.menuItem.imageUrl}`
-          : "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop",
-        description: item.menuItem?.description || "",
-        prepTime: `${item.menuItem?.preparationTimeStart || 0}-${
-          item.menuItem?.preparationTimeEnd || 30
-        } mins`,
-        quantity: item.quantity,
-        totalPrice:
-          item.totalPrice || item.quantity * (item.menuItem?.basePrice || 0),
-        menuItem: item.menuItem,
-        menuItemOptions: item.menuItemOptions || [],
-      }));
+      const transformedItems = response.data.map((item) => {
+        const basePrice = item.menuItem?.basePrice || 0;
+        const itemOffer = item.menuItem?.itemOffer;
+
+        let finalPrice = basePrice;
+        if (itemOffer?.isEnabled) {
+          if (itemOffer.isPercentage) {
+            finalPrice =
+              basePrice - (basePrice * itemOffer.discountValue) / 100;
+          } else {
+            finalPrice = basePrice - itemOffer.discountValue;
+          }
+        }
+
+        let prepTime = null;
+        if (
+          item.menuItem?.preparationTimeStart !== null &&
+          item.menuItem?.preparationTimeEnd !== null
+        ) {
+          prepTime = `${item.menuItem.preparationTimeStart}-${item.menuItem.preparationTimeEnd} mins`;
+        }
+
+        return {
+          id: item.id,
+          name: item.menuItem?.name || "Product",
+          category: item.menuItem?.category?.name?.toLowerCase() || "meals",
+          price: basePrice,
+          finalPrice: finalPrice,
+          image: item.menuItem?.imageUrl
+            ? `https://restaurant-template.runasp.net/${item.menuItem.imageUrl}`
+            : "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop",
+          description: item.menuItem?.description || "",
+          prepTime: prepTime,
+          quantity: item.quantity,
+          totalPrice: item.totalPrice || item.quantity * finalPrice,
+          menuItem: item.menuItem,
+          menuItemOptions: item.menuItemOptions || [],
+          additionalNotes: item.additionalNotes || "",
+          hasDiscount: itemOffer?.isEnabled || false,
+          discountValue: itemOffer?.discountValue || 0,
+          isPercentageDiscount: itemOffer?.isPercentage || false,
+        };
+      });
 
       setCartItems(transformedItems);
     } catch (error) {
@@ -101,15 +173,222 @@ export default function Cart() {
         return;
       }
 
-      // يمكنك استدعاء API للتحقق من العناوين
-      // const response = await axiosInstance.get("/api/Addresses/GetAll");
-      // setHasAddress(response.data.length > 0);
-
       setHasAddress(true);
     } catch (error) {
       console.error("Error checking user address:", error);
       setHasAddress(false);
     }
+  };
+
+  const toArabicNumbers = (num) => {
+    const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return num.toString().replace(/\d/g, (digit) => arabicNumbers[digit]);
+  };
+
+  const openProductDetailsModal = async (item) => {
+    try {
+      setSelectedProduct(item);
+      setProductQuantity(item.quantity);
+      setAdditionalNotes(item.additionalNotes || "");
+
+      const response = await axiosInstance.get(
+        `/api/MenuItems/Get/${item.menuItem?.id}`
+      );
+      const productData = response.data;
+
+      const transformedAddons =
+        productData.typesWithOptions?.map((type) => ({
+          id: type.id,
+          title: type.name,
+          type: type.canSelectMultipleOptions ? "multiple" : "single",
+          required: type.isSelectionRequired,
+          canSelectMultipleOptions: type.canSelectMultipleOptions,
+          isSelectionRequired: type.isSelectionRequired,
+          options:
+            type.menuItemOptions?.map((option) => ({
+              id: option.id,
+              name: option.name,
+              price: option.price,
+              typeId: type.id,
+              branchMenuItemOption: option.branchMenuItemOption || [],
+            })) || [],
+        })) || [];
+
+      setProductAddons(transformedAddons);
+      setProductDetails(productData);
+
+      const initialSelectedAddons = {};
+
+      if (item.menuItemOptions && item.menuItemOptions.length > 0) {
+        const optionIdMap = {};
+        transformedAddons.forEach((addon) => {
+          addon.options.forEach((option) => {
+            optionIdMap[option.id] = {
+              typeId: addon.id,
+              option: option,
+            };
+          });
+        });
+
+        item.menuItemOptions.forEach((cartOption) => {
+          const optionInfo = optionIdMap[cartOption.id];
+          if (optionInfo) {
+            const typeId = optionInfo.typeId;
+            if (!initialSelectedAddons[typeId]) {
+              initialSelectedAddons[typeId] = [];
+            }
+            initialSelectedAddons[typeId].push(cartOption.id);
+          }
+        });
+      }
+
+      console.log("Initial selected addons:", initialSelectedAddons);
+      setSelectedAddons(initialSelectedAddons);
+
+      setShowProductDetailsModal(true);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      Swal.fire({
+        icon: "error",
+        title: "خطأ",
+        text: "فشل في تحميل تفاصيل المنتج",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl dark:bg-gray-800 dark:text-white",
+        },
+      });
+    }
+  };
+
+  const closeProductDetailsModal = () => {
+    setShowProductDetailsModal(false);
+    setSelectedProduct(null);
+    setProductDetails(null);
+    setProductAddons([]);
+    setSelectedAddons({});
+    setAdditionalNotes("");
+  };
+
+  const handleAddonSelect = (addonId, optionId, type) => {
+    setSelectedAddons((prev) => {
+      const newSelectedAddons = { ...prev };
+
+      if (type === "single") {
+        newSelectedAddons[addonId] = [optionId];
+      } else {
+        const currentSelections = newSelectedAddons[addonId] || [];
+
+        if (currentSelections.includes(optionId)) {
+          newSelectedAddons[addonId] = currentSelections.filter(
+            (id) => id !== optionId
+          );
+        } else {
+          newSelectedAddons[addonId] = [...currentSelections, optionId];
+        }
+
+        if (newSelectedAddons[addonId].length === 0) {
+          delete newSelectedAddons[addonId];
+        }
+      }
+
+      return newSelectedAddons;
+    });
+  };
+
+  const calculateProductTotalPrice = () => {
+    if (!productDetails) return 0;
+
+    const basePrice = productDetails.basePrice || 0;
+    let total = basePrice * productQuantity;
+
+    Object.values(selectedAddons).forEach((optionIds) => {
+      optionIds.forEach((optionId) => {
+        productAddons.forEach((addon) => {
+          const option = addon.options.find((opt) => opt.id === optionId);
+          if (option) {
+            total += option.price * productQuantity;
+          }
+        });
+      });
+    });
+
+    return total;
+  };
+
+  const updateCartItem = async () => {
+    if (!selectedProduct || !productDetails) return;
+
+    try {
+      setUpdatingCart(true);
+
+      const options = [];
+      Object.values(selectedAddons).forEach((optionIds) => {
+        optionIds.forEach((optionId) => {
+          options.push(optionId);
+        });
+      });
+
+      await axiosInstance.delete(`/api/CartItems/Delete/${selectedProduct.id}`);
+
+      await axiosInstance.post("/api/CartItems/AddCartItem", {
+        menuItemId: productDetails.id,
+        quantity: productQuantity,
+        options: options,
+        additionalNotes: additionalNotes.trim(),
+      });
+
+      await fetchCartItems();
+
+      Swal.fire({
+        icon: "success",
+        title: "تم التحديث!",
+        text: "تم تحديث المنتج في سلة التسوق بنجاح",
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: {
+          popup: "rounded-3xl shadow-2xl dark:bg-gray-800 dark:text-white",
+        },
+      });
+
+      closeProductDetailsModal();
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "خطأ",
+        text: "فشل في تحديث المنتج",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl dark:bg-gray-800 dark:text-white",
+        },
+      });
+    } finally {
+      setUpdatingCart(false);
+    }
+  };
+
+  const handleOpenNotesModal = () => {
+    setShowNotesModal(true);
+  };
+
+  const handleCloseNotesModal = () => {
+    setShowNotesModal(false);
+  };
+
+  const handleSaveNotes = () => {
+    handleCloseNotesModal();
+    toast.success("تم حفظ التعليمات الإضافية", {
+      position: "top-right",
+      autoClose: 1500,
+      rtl: true,
+    });
+  };
+
+  const handleClearNotes = () => {
+    setAdditionalNotes("");
+    toast.info("تم مسح التعليمات الإضافية", {
+      position: "top-right",
+      autoClose: 1500,
+      rtl: true,
+    });
   };
 
   const updateQuantity = async (id, newQuantity) => {
@@ -130,8 +409,7 @@ export default function Cart() {
             ? {
                 ...item,
                 quantity: newQuantity,
-                totalPrice:
-                  newQuantity * (item.menuItem?.basePrice || item.price),
+                totalPrice: newQuantity * item.finalPrice,
               }
             : item
         )
@@ -254,7 +532,8 @@ export default function Cart() {
 
   const calculateSubtotal = () => {
     return cartItems.reduce(
-      (total, item) => total + (item.totalPrice || item.price * item.quantity),
+      (total, item) =>
+        total + (item.totalPrice || item.finalPrice * item.quantity),
       0
     );
   };
@@ -379,12 +658,12 @@ export default function Cart() {
                       }</h4>
                       <p class="text-xs text-gray-600 dark:text-gray-400">الكمية: ${
                         item.quantity
-                      } × ${(item.price || 0).toFixed(2)} ج.م</p>
+                      } × ${(item.finalPrice || 0).toFixed(2)} ج.م</p>
                     </div>
                   </div>
                   <span class="font-bold text-[#E41E26] dark:text-[#FDB913]">${(
                     item.totalPrice ||
-                    item.price * item.quantity ||
+                    item.finalPrice * item.quantity ||
                     0
                   ).toFixed(2)} ج.م</span>
                 </div>
@@ -576,6 +855,400 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-3 sm:px-4 py-4 sm:py-8 transition-colors duration-300">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={true}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{ zIndex: 9999 }}
+      />
+
+      {showNotesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <motion.div
+            ref={notesModalRef}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6"
+            dir="rtl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <FaStickyNote className="text-[#E41E26] text-xl" />
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                  تعليمات إضافية
+                </h3>
+              </div>
+              <button
+                onClick={handleCloseNotesModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                اكتب أي ملاحظات
+              </p>
+
+              <textarea
+                value={additionalNotes}
+                onChange={(e) => setAdditionalNotes(e.target.value)}
+                placeholder="اكتب تعليماتك هنا..."
+                className="w-full h-40 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-[#E41E26] focus:border-transparent resize-none"
+                dir="rtl"
+                maxLength={500}
+                autoFocus
+              />
+
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  اختياري
+                </span>
+                <span
+                  className={`text-xs ${
+                    additionalNotes.length >= 450
+                      ? "text-red-500"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  {additionalNotes.length}/500
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleClearNotes}
+                className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <FaTrash className="text-sm" />
+                مسح
+              </button>
+              <button
+                onClick={handleCloseNotesModal}
+                className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleSaveNotes}
+                className="flex-1 py-3 bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <FaSave className="text-sm" />
+                حفظ
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {showProductDetailsModal && productDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0" onClick={closeProductDetailsModal}>
+          </div>
+          <motion.div
+            ref={productDetailsModalRef}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative z-10"
+            dir="rtl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <img
+                    src={
+                      productDetails.imageUrl
+                        ? `https://restaurant-template.runasp.net/${productDetails.imageUrl}`
+                        : "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop"
+                    }
+                    alt={productDetails.name}
+                    className="w-16 h-16 rounded-xl object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                    {productDetails.name}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-3 mt-2">
+                    {productDetails.itemOffer?.isEnabled ? (
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* Prices */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500 dark:text-gray-400 text-sm line-through">
+                            {toArabicNumbers(productDetails.basePrice)} ج.م
+                          </span>
+                          <span className="text-xl font-bold text-[#E41E26]">
+                            {toArabicNumbers(
+                              productDetails.itemOffer.isPercentage
+                                ? productDetails.basePrice -
+                                    (productDetails.basePrice *
+                                      productDetails.itemOffer.discountValue) /
+                                      100
+                                : productDetails.basePrice -
+                                    productDetails.itemOffer.discountValue
+                            )}{" "}
+                            ج.م
+                          </span>
+                        </div>
+
+                        {/* Discount Badge - AFTER THE PRICE */}
+                        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1.5 rounded-lg font-bold shadow-lg text-sm flex items-center gap-1">
+                          <span>خصم</span>
+                          <span>
+                            {productDetails.itemOffer.isPercentage
+                              ? `${productDetails.itemOffer.discountValue}%`
+                              : `${productDetails.itemOffer.discountValue} ج.م`}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-xl font-bold text-[#E41E26]">
+                        {toArabicNumbers(productDetails.basePrice)} ج.م
+                      </span>
+                    )}
+
+                    {/* Calories and Prep Time */}
+                    <div className="flex items-center gap-3">
+                      {productDetails.calories && (
+                        <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400 text-sm">
+                          <FaFire className="text-orange-500 text-sm" />
+                          {toArabicNumbers(productDetails.calories)} كالوري
+                        </span>
+                      )}
+
+                      {productDetails.preparationTimeStart !== null &&
+                        productDetails.preparationTimeEnd !== null && (
+                          <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400 text-sm">
+                            <FaClock className="text-blue-500 text-sm" />
+                            {toArabicNumbers(
+                              productDetails.preparationTimeStart
+                            )}
+                            {productDetails.preparationTimeEnd !== null &&
+                              `-${toArabicNumbers(
+                                productDetails.preparationTimeEnd
+                              )}`}{" "}
+                            دقيقة
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={closeProductDetailsModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
+
+            {/* Content - Scrollable */}
+            <div className="overflow-y-auto max-h-[calc(90vh-180px)] sm:max-h-[calc(90vh-200px)] p-4 sm:p-5 lg:p-6">
+              {/* Description */}
+              {productDetails.description && (
+                <div className="mb-4 sm:mb-5 lg:mb-6">
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-800 dark:text-white mb-1 sm:mb-2">
+                    الوصف
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-xs sm:text-sm">
+                    {productDetails.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Addons - UPDATED DESIGN TO MATCH PRODUCT DETAILS PAGE */}
+              {productAddons.length > 0 && (
+                <div className="space-y-4 sm:space-y-5 lg:space-y-6 mb-4 sm:mb-5 lg:mb-6">
+                  {productAddons.map((addon) => {
+                    const selectedOptionIds = selectedAddons[addon.id] || [];
+
+                    return (
+                      <div
+                        key={addon.id}
+                        className="bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-600"
+                        dir="rtl"
+                      >
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <h4 className="font-semibold text-sm sm:text-base text-gray-800 dark:text-gray-200">
+                              {addon.title}
+                            </h4>
+                            {addon.isSelectionRequired && (
+                              <span className="text-xs bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full">
+                                مطلوب
+                              </span>
+                            )}
+                            {addon.canSelectMultipleOptions && (
+                              <span className="text-xs bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full">
+                                متعدد
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-2">
+                          {addon.options.map((option) => {
+                            const isSelected = selectedOptionIds.includes(
+                              option.id
+                            );
+                            return (
+                              <motion.button
+                                key={option.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() =>
+                                  handleAddonSelect(
+                                    addon.id,
+                                    option.id,
+                                    addon.type
+                                  )
+                                }
+                                className={`w-full p-2 rounded-md sm:rounded-lg border-2 transition-all duration-200 flex items-center justify-between ${
+                                  isSelected
+                                    ? "border-[#E41E26] bg-red-50 dark:bg-red-900/20"
+                                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
+                                }`}
+                                dir="rtl"
+                              >
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`font-medium text-xs sm:text-sm ${
+                                      isSelected
+                                        ? "text-[#E41E26]"
+                                        : "text-gray-700 dark:text-gray-300"
+                                    }`}
+                                  >
+                                    {option.name}
+                                  </span>
+                                  {isSelected && (
+                                    <FaCheck className="text-[#E41E26] text-xs" />
+                                  )}
+                                </div>
+
+                                {option.price > 0 && (
+                                  <span className="text-xs text-green-600 dark:text-green-400 font-semibold">
+                                    +{toArabicNumbers(option.price)} ج.م
+                                  </span>
+                                )}
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <button
+                onClick={handleOpenNotesModal}
+                className="w-full bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 border-2 border-dashed border-indigo-300 dark:border-indigo-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center hover:border-solid hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 mb-4 sm:mb-5 lg:mb-6"
+                dir="rtl"
+              >
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="bg-indigo-100 dark:bg-indigo-800/50 p-1.5 sm:p-2 rounded-full">
+                    <FaStickyNote className="text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 text-sm sm:text-base">
+                      {additionalNotes
+                        ? "تم إضافة تعليمات إضافية"
+                        : "إضافة تعليمات إضافية"}
+                    </h4>
+                    <p className="text-indigo-600/70 dark:text-indigo-400/70 text-xs mt-0.5 sm:mt-1">
+                      {additionalNotes
+                        ? "انقر لتعديل التعليمات الإضافية"
+                        : "انقر لإضافة تعليمات إضافية"}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Footer - Quantity and Actions */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-5 lg:p-6 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Quantity Controls */}
+                <div className="flex items-center justify-between w-full md:w-auto gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                      الكمية:
+                    </span>
+                    <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg p-1 shadow">
+                      <button
+                        onClick={() =>
+                          setProductQuantity((prev) =>
+                            prev > 1 ? prev - 1 : 1
+                          )
+                        }
+                        className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        <FaMinus className="text-[#E41E26] text-xs" />
+                      </button>
+                      <span className="font-bold text-gray-800 dark:text-white min-w-8 sm:min-w-10 text-center text-sm sm:text-base">
+                        {toArabicNumbers(productQuantity)}
+                      </span>
+                      <button
+                        onClick={() => setProductQuantity((prev) => prev + 1)}
+                        className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        <FaPlus className="text-[#E41E26] text-xs" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="text-base sm:text-lg lg:text-xl font-bold text-[#E41E26]">
+                    {toArabicNumbers(calculateProductTotalPrice().toFixed(2))}{" "}
+                    ج.م
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
+                  <button
+                    onClick={closeProductDetailsModal}
+                    className="flex-1 md:flex-none px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+                  >
+                    إلغاء
+                  </button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={updateCartItem}
+                    disabled={updatingCart}
+                    className="flex-1 md:flex-none px-4 py-2 bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                  >
+                    {updatingCart ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                        تحديث...
+                      </>
+                    ) : (
+                      <>
+                        <FaEdit className="text-xs" />
+                        تحديث
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -654,45 +1327,76 @@ export default function Cart() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-[#fff8e7] to-[#ffe5b4] dark:from-gray-700 dark:to-gray-600 rounded-xl sm:rounded-2xl border border-[#FDB913]/30 dark:border-gray-600 transition-colors duration-300"
+                        className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-[#fff8e7] to-[#ffe5b4] dark:from-gray-700 dark:to-gray-600 rounded-xl sm:rounded-2xl border border-[#FDB913]/30 dark:border-gray-600 transition-colors duration-300 hover:shadow-lg cursor-pointer group"
+                        onClick={() => openProductDetailsModal(item)}
                       >
-                        {/* Product Image and Details */}
                         <div className="flex gap-3 sm:gap-4 w-full sm:w-auto sm:flex-1">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
-                          />
+                          <div className="relative">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
+                            />
+                            {/* Badge for discount */}
+                            {item.hasDiscount && (
+                              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
+                                {item.isPercentageDiscount
+                                  ? `خصم ${item.discountValue}%`
+                                  : `خصم ${item.discountValue} ج.م`}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="mb-1 sm:mb-2">
-                              <h3 className="font-bold text-gray-800 dark:text-white text-base sm:text-lg">
-                                {item.name}
-                              </h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-bold text-gray-800 dark:text-white text-base sm:text-lg group-hover:text-[#E41E26] transition-colors">
+                                  {item.name}
+                                </h3>
+                                <FaInfoCircle className="text-[#E41E26] opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
                             </div>
-                            <p className="text-[#E41E26] dark:text-[#FDB913] font-bold text-base sm:text-lg mb-1 sm:mb-2">
-                              {(item.price || 0).toFixed(2)} ج.م
-                            </p>
+                            {item.hasDiscount ? (
+                              <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                                <span className="text-gray-500 dark:text-gray-400 text-sm line-through">
+                                  {(item.price || 0).toFixed(2)} ج.م
+                                </span>
+                                <span className="text-[#E41E26] dark:text-[#FDB913] font-bold text-base sm:text-lg">
+                                  {(item.finalPrice || 0).toFixed(2)} ج.م
+                                </span>
+                              </div>
+                            ) : (
+                              <p className="text-[#E41E26] dark:text-[#FDB913] font-bold text-base sm:text-lg mb-1 sm:mb-2">
+                                {(item.price || 0).toFixed(2)} ج.م
+                              </p>
+                            )}
                             <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">
                               {item.description}
                             </p>
-                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                              <FaClock
-                                className="text-[#E41E26] dark:text-[#FDB913]"
-                                size={12}
-                              />
-                              <span>{item.prepTime}</span>
-                            </div>
+
+                            {item.prepTime && (
+                              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                <FaClock
+                                  className="text-[#E41E26] dark:text-[#FDB913]"
+                                  size={12}
+                                />
+                                <span>{item.prepTime}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {/* Quantity Controls, Total Price and Remove Button */}
-                        <div className="flex items-center justify-between w-full sm:w-auto sm:flex-nowrap gap-2 sm:gap-3 mt-3 sm:mt-0">
+                        <div
+                          className="flex items-center justify-between w-full sm:w-auto sm:flex-nowrap gap-2 sm:gap-3 mt-3 sm:mt-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-1 sm:gap-2 bg-white dark:bg-gray-700 rounded-lg sm:rounded-xl p-1 sm:p-2 shadow-lg">
                             <button
-                              onClick={() =>
-                                updateQuantity(item.id, item.quantity - 1)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.id, item.quantity - 1);
+                              }}
                               className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md sm:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 text-[#E41E26] dark:text-[#FDB913]"
                             >
                               <FaMinus size={10} className="sm:w-3 sm:h-3" />
@@ -701,9 +1405,10 @@ export default function Cart() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.id, item.quantity + 1);
+                              }}
                               className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md sm:rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 text-[#E41E26] dark:text-[#FDB913]"
                             >
                               <FaPlus size={10} className="sm:w-3 sm:h-3" />
@@ -715,7 +1420,7 @@ export default function Cart() {
                             <div className="font-bold text-gray-800 dark:text-white text-base sm:text-lg whitespace-nowrap">
                               {(
                                 item.totalPrice ||
-                                item.price * item.quantity ||
+                                item.finalPrice * item.quantity ||
                                 0
                               ).toFixed(2)}{" "}
                               ج.م
@@ -726,7 +1431,10 @@ export default function Cart() {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
-                            onClick={() => removeItem(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeItem(item.id);
+                            }}
                             className="p-1 sm:p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md sm:rounded-lg transition-colors duration-200"
                           >
                             <FaTrash size={14} className="sm:w-4 sm:h-4" />
@@ -841,7 +1549,7 @@ export default function Cart() {
             </motion.div>
           </div>
 
-          {/* Order Summary - Fixed with full height and scrolling */}
+          {/* Order Summary */}
           <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, x: 20 }}

@@ -1138,7 +1138,6 @@ const Home = () => {
                       <div className="flex">
                         <div className="w-28 flex-shrink-0 ml-3">
                           <div className="relative h-32 w-full overflow-hidden rounded-xl">
-                            {/* تغيير هنا: object-contain إلى object-cover وإضافة aspect-square */}
                             <img
                               src={product.image}
                               alt={product.name}
@@ -1149,14 +1148,14 @@ const Home = () => {
 
                         <div className="flex-1 min-w-0">
                           <h3
-                            className="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-[#E41E26] transition-colors line-clamp-2 mb-2"
+                            className="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-[#E41E26] transition-colors line-clamp-1 mb-2"
                             dir={isArabic(product.name) ? "rtl" : "ltr"}
                           >
                             {product.name}
                           </h3>
 
                           <p
-                            className="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2 leading-relaxed"
+                            className="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-1 leading-relaxed"
                             dir={isArabic(product.description) ? "rtl" : "ltr"}
                           >
                             {product.description}
@@ -1259,7 +1258,7 @@ const Home = () => {
                         {product.name}
                       </h3>
                       <p
-                        className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-3 line-clamp-2 leading-relaxed"
+                        className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-3 line-clamp-1 leading-relaxed"
                         dir={isArabic(product.description) ? "rtl" : "ltr"}
                       >
                         {product.description}
