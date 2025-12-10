@@ -23,6 +23,7 @@ import Cashier from "./pages/Cashier";
 import Favorites from "./pages/Favorites";
 import Branches from "./pages/Branches";
 import ItemOffersManagement from "./pages/ItemOffersManagement";
+import SalesReports from "./pages/SalesReports";
 
 function App() {
   const location = useLocation();
@@ -110,6 +111,7 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/branches" element={<Branches />} />
           <Route path="/admin/item-offers" element={<ItemOffersManagement />} />
+          <Route path="/admin/reports" element={<SalesReports />} />
         </Routes>
       </main>
 

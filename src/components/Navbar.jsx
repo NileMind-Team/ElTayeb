@@ -25,6 +25,7 @@ import {
   FaHeart,
   FaMap,
   FaPercent,
+  FaChartBar,
 } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,6 +183,11 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const handleItemOffersClick = () => {
     setIsSidebarOpen(false);
     navigate("/admin/item-offers");
+  };
+
+  const handleReportsClick = () => {
+    setIsSidebarOpen(false);
+    navigate("/admin/reports");
   };
 
   useEffect(() => {
@@ -651,6 +657,22 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                               <FaCity className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
                             </div>
                             <span className="text-lg">إدارة المدن</span>
+                          </button>
+                        </motion.div>
+
+                        <motion.div
+                          whileHover={{ scale: 1.02, x: -4 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            onClick={handleReportsClick}
+                            className="w-full text-right flex items-center gap-4 px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-xl border border-transparent hover:border-[#FDB913]/30 dark:hover:border-gray-500"
+                            dir="rtl"
+                          >
+                            <div className="p-2 bg-[#E41E26]/10 dark:bg-[#FDB913]/20 rounded-lg">
+                              <FaChartBar className="text-[#E41E26] dark:text-[#FDB913] text-lg" />
+                            </div>
+                            <span className="text-lg">تقارير المبيعات</span>
                           </button>
                         </motion.div>
                       </div>

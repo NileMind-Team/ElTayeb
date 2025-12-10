@@ -20,6 +20,9 @@ import {
   FaSquare,
   FaCheckCircle,
   FaCheck,
+  FaLink,
+  FaDownload,
+  FaImage,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
@@ -61,6 +64,9 @@ const ProductForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [imageInputMode, setImageInputMode] = useState("upload");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isDownloadingImage, setIsDownloadingImage] = useState(false);
 
   const [schedules, setSchedules] = useState([
     {
@@ -89,6 +95,91 @@ const ProductForm = () => {
   const isArabic = (text) => {
     const arabicRegex = /[\u0600-\u06FF]/;
     return arabicRegex.test(text);
+  };
+
+  const downloadImageFromUrl = async (url) => {
+    if (!url || !isValidUrl(url)) {
+      Swal.fire({
+        icon: "error",
+        title: "رابط غير صالح",
+        text: "الرجاء إدخال رابط صحيح للصورة",
+        confirmButtonColor: "#E41E26",
+      });
+      return null;
+    }
+
+    setIsDownloadingImage(true);
+    try {
+      const response = await fetch(url, {
+        mode: "cors",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`فشل في تحميل الصورة: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.startsWith("image/")) {
+        throw new Error("الرابط لا يشير إلى صورة صالحة");
+      }
+
+      const blob = await response.blob();
+
+      if (blob.size > 5 * 1024 * 1024) {
+        throw new Error("حجم الصورة يتجاوز الحد الأقصى (5MB)");
+      }
+
+      const filename = url.split("/").pop() || `image-${Date.now()}.jpg`;
+      const file = new File([blob], filename, { type: blob.type });
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setFormData({
+          ...formData,
+          Image: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+
+      setImageFile(file);
+      setHasImageChanged(true);
+      setImageUrl("");
+
+      Swal.fire({
+        icon: "success",
+        title: "تم تحميل الصورة!",
+        text: "تم تحميل الصورة بنجاح من الرابط المقدم",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      return file;
+    } catch (error) {
+      console.error("Error downloading image:", error);
+      Swal.fire({
+        icon: "error",
+        title: "خطأ في تحميل الصورة",
+        text: error.message || "فشل في تحميل الصورة من الرابط المقدم",
+        confirmButtonColor: "#E41E26",
+      });
+      return null;
+    } finally {
+      setIsDownloadingImage(false);
+    }
+  };
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -398,6 +489,8 @@ const ProductForm = () => {
         if (product.imageUrl) {
           const imageUrl = `https://restaurant-template.runasp.net/${product.imageUrl}`;
           setImagePreview(imageUrl);
+          setImageInputMode("url");
+          setImageUrl(imageUrl);
         }
 
         let initialSchedulesData = [];
@@ -605,7 +698,9 @@ const ProductForm = () => {
   };
 
   const handleUploadAreaClick = () => {
-    document.getElementById("file-input").click();
+    if (imageInputMode === "upload") {
+      document.getElementById("file-input").click();
+    }
   };
 
   const handleRemoveImage = (e) => {
@@ -613,7 +708,22 @@ const ProductForm = () => {
     setImagePreview("");
     setFormData({ ...formData, Image: "" });
     setImageFile(null);
+    setImageUrl("");
     setHasImageChanged(true);
+  };
+
+  const handleDownloadFromUrl = async () => {
+    if (!imageUrl.trim()) {
+      Swal.fire({
+        icon: "error",
+        title: "رابط فارغ",
+        text: "الرجاء إدخال رابط الصورة أولاً",
+        confirmButtonColor: "#E41E26",
+      });
+      return;
+    }
+
+    await downloadImageFromUrl(imageUrl);
   };
 
   const isFormValid = () => {
@@ -836,6 +946,20 @@ const ProductForm = () => {
       } else {
         if (imageFile) {
           formDataToSend.append("Image", imageFile);
+        } else if (imageInputMode === "url" && !imageFile) {
+          const file = await downloadImageFromUrl(imageUrl);
+          if (file) {
+            formDataToSend.append("Image", file);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "خطأ في الصورة",
+              text: "يرجى تحميل الصورة من الرابط أولاً أو استخدام صورة أخرى",
+              confirmButtonColor: "#E41E26",
+            });
+            setIsLoading(false);
+            return;
+          }
         }
       }
 
@@ -1160,45 +1284,156 @@ const ProductForm = () => {
                       <label className="block text-xs sm:text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 mb-1 xs:mb-1.5 sm:mb-2">
                         صورة المنتج *
                       </label>
-                      <div
-                        className="border-2 border-dashed border-gray-300 rounded-lg p-2 xs:p-3 sm:p-4 text-center hover:border-[#E41E26] transition-colors duration-200 cursor-pointer dark:border-gray-600"
-                        onClick={handleUploadAreaClick}
-                      >
-                        {imagePreview ? (
-                          <div className="relative">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-full h-48 xs:h-56 sm:h-64 md:h-96 object-contain rounded-lg mb-2 xs:mb-3"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleRemoveImage}
-                              className="absolute top-1 xs:top-2 left-1 xs:left-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
-                            >
-                              <FaTimes size={10} className="xs:size-2" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="py-8 xs:py-10 sm:py-12 md:py-16">
-                            <FaUpload className="mx-auto text-2xl xs:text-3xl sm:text-4xl md:text-5xl text-gray-400 dark:text-gray-500 mb-2 xs:mb-3 sm:mb-4" />
-                            <p className="text-gray-600 dark:text-gray-400 mb-1.5 xs:mb-2 sm:mb-3 text-xs xs:text-sm sm:text-base">
-                              انقر لرفع الصورة
-                            </p>
-                            <p className="text-gray-500 dark:text-gray-500 text-[10px] xs:text-xs sm:text-sm">
-                              PNG, JPG, JPEG (الحد الأقصى 5MB)
-                            </p>
-                          </div>
-                        )}
-                        <input
-                          id="file-input"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                          required={!isEditing}
-                        />
+
+                      {/* Switch between upload modes */}
+                      <div className="flex gap-2 mb-3 xs:mb-4">
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setImageInputMode("upload")}
+                          className={`flex-1 flex items-center justify-center gap-1.5 xs:gap-2 p-2 xs:p-2.5 rounded-lg border-2 transition-all duration-200 ${
+                            imageInputMode === "upload"
+                              ? "border-[#E41E26] bg-white text-[#E41E26] shadow-md dark:bg-gray-600"
+                              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400"
+                          }`}
+                        >
+                          <FaUpload className="text-xs xs:text-sm" />
+                          <span className="text-xs xs:text-sm font-medium">
+                            رفع صورة
+                          </span>
+                        </motion.button>
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setImageInputMode("url")}
+                          className={`flex-1 flex items-center justify-center gap-1.5 xs:gap-2 p-2 xs:p-2.5 rounded-lg border-2 transition-all duration-200 ${
+                            imageInputMode === "url"
+                              ? "border-[#E41E26] bg-white text-[#E41E26] shadow-md dark:bg-gray-600"
+                              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400"
+                          }`}
+                        >
+                          <FaLink className="text-xs xs:text-sm" />
+                          <span className="text-xs xs:text-sm font-medium">
+                            رابط صورة
+                          </span>
+                        </motion.button>
                       </div>
+
+                      {imageInputMode === "upload" ? (
+                        <div
+                          className="border-2 border-dashed border-gray-300 rounded-lg p-2 xs:p-3 sm:p-4 text-center hover:border-[#E41E26] transition-colors duration-200 cursor-pointer dark:border-gray-600"
+                          onClick={handleUploadAreaClick}
+                        >
+                          {imagePreview ? (
+                            <div className="relative">
+                              <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="w-full h-48 xs:h-56 sm:h-64 md:h-96 object-contain rounded-lg mb-2 xs:mb-3"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute top-1 xs:top-2 left-1 xs:left-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                              >
+                                <FaTimes size={10} className="xs:size-2" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="py-8 xs:py-10 sm:py-12 md:py-16">
+                              <FaUpload className="mx-auto text-2xl xs:text-3xl sm:text-4xl md:text-5xl text-gray-400 dark:text-gray-500 mb-2 xs:mb-3 sm:mb-4" />
+                              <p className="text-gray-600 dark:text-gray-400 mb-1.5 xs:mb-2 sm:mb-3 text-xs xs:text-sm sm:text-base">
+                                انقر لرفع الصورة
+                              </p>
+                              <p className="text-gray-500 dark:text-gray-500 text-[10px] xs:text-xs sm:text-sm">
+                                PNG, JPG, JPEG (الحد الأقصى 5MB)
+                              </p>
+                            </div>
+                          )}
+                          <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                            required={!isEditing && imageInputMode === "upload"}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-3 xs:space-y-4">
+                          <div className="border-2 border-gray-300 rounded-lg p-2 xs:p-3 sm:p-4 dark:border-gray-600">
+                            <div className="mb-3 xs:mb-4">
+                              <label className="block text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
+                                رابط الصورة
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="url"
+                                  value={imageUrl}
+                                  onChange={(e) => setImageUrl(e.target.value)}
+                                  placeholder="أدخل رابط الصورة"
+                                  className="flex-1 border border-gray-200 bg-white text-black rounded-lg px-3 xs:px-4 py-2 xs:py-2.5 outline-none focus:ring-2 focus:ring-[#E41E26] focus:border-transparent transition-all duration-200 text-xs sm:text-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                />
+                                <motion.button
+                                  type="button"
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={handleDownloadFromUrl}
+                                  disabled={
+                                    isDownloadingImage || !imageUrl.trim()
+                                  }
+                                  className={`px-3 xs:px-4 py-2 xs:py-2.5 rounded-lg font-semibold transition-all duration-300 flex items-center gap-1.5 xs:gap-2 text-xs xs:text-sm ${
+                                    imageUrl.trim() && !isDownloadingImage
+                                      ? "bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white hover:shadow-xl hover:shadow-[#E41E26]/25 cursor-pointer"
+                                      : "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400"
+                                  }`}
+                                >
+                                  {isDownloadingImage ? (
+                                    <>
+                                      <div className="animate-spin h-3 w-3 xs:h-4 xs:w-4 border-t-2 border-b-2 border-white rounded-full"></div>
+                                      <span>جاري التحميل...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FaDownload className="xs:size-3" />
+                                      <span>تحميل</span>
+                                    </>
+                                  )}
+                                </motion.button>
+                              </div>
+                              <p className="text-gray-500 dark:text-gray-400 text-[10px] xs:text-xs mt-2">
+                                أدخل رابط الصورة ثم انقر على زر "تحميل"
+                              </p>
+                            </div>
+
+                            {imagePreview ? (
+                              <div className="relative">
+                                <img
+                                  src={imagePreview}
+                                  alt="Preview"
+                                  className="w-full h-48 xs:h-56 sm:h-64 object-contain rounded-lg mb-2 xs:mb-3"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveImage}
+                                  className="absolute top-1 xs:top-2 left-1 xs:left-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                                >
+                                  <FaTimes size={10} className="xs:size-2" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="py-6 xs:py-8 sm:py-10 text-center">
+                                <FaImage className="mx-auto text-3xl xs:text-4xl sm:text-5xl text-gray-400 dark:text-gray-500 mb-2 xs:mb-3 sm:mb-4" />
+                                <p className="text-gray-600 dark:text-gray-400 mb-1.5 xs:mb-2 sm:mb-3 text-xs xs:text-sm">
+                                  سيظهر معاينة الصورة هنا بعد التحميل
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div>
