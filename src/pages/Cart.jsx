@@ -56,9 +56,9 @@ export default function Cart() {
   const [loadingAddresses, setLoadingAddresses] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [addressDropdownOpen, setAddressDropdownOpen] = useState(false);
-  const [pickupFee, setPickupFee] = useState(null);
+  const [deliveryFees, setDeliveryFees] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [loadingPickupFee, setLoadingPickupFee] = useState(false);
+  const [loadingDeliveryFees, setLoadingDeliveryFees] = useState(false);
   const [itemNotes, setItemNotes] = useState("");
 
   const notesModalRef = React.useRef(null);
@@ -69,7 +69,7 @@ export default function Cart() {
     fetchCartItems();
     fetchBranches();
     fetchUserAddresses();
-    fetchPickupFee();
+    fetchDeliveryFees();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -119,24 +119,18 @@ export default function Cart() {
     }
   }, [location.state]);
 
-  const fetchPickupFee = async () => {
+  const fetchDeliveryFees = async () => {
     try {
-      setLoadingPickupFee(true);
+      setLoadingDeliveryFees(true);
       const response = await axiosInstance.get("/api/DeliveryFees/GetAll");
 
       if (response.data && Array.isArray(response.data)) {
-        const pickupFeeItem = response.data.find((item) =>
-          item.areaName.includes("الاستلام من المكان")
-        );
-
-        if (pickupFeeItem) {
-          setPickupFee(pickupFeeItem);
-        }
+        setDeliveryFees(response.data);
       }
     } catch (error) {
-      console.error("Error fetching pickup fee:", error);
+      console.error("Error fetching delivery fees:", error);
     } finally {
-      setLoadingPickupFee(false);
+      setLoadingDeliveryFees(false);
     }
   };
 
@@ -354,6 +348,52 @@ export default function Cart() {
     if (address.detailedDescription) parts.push(address.detailedDescription);
 
     return parts.join("، ");
+  };
+
+  const getDeliveryFee = () => {
+    if (deliveryType === "delivery" && selectedArea) {
+      return selectedArea.fee;
+    } else if (deliveryType === "pickup" && selectedBranch) {
+      const branchPickupFee = deliveryFees.find(
+        (fee) =>
+          fee.areaName.includes("الاستلام من المكان") &&
+          fee.branchId === selectedBranch.id
+      );
+
+      if (branchPickupFee) {
+        return branchPickupFee.fee;
+      }
+
+      const anyPickupFee = deliveryFees.find((fee) =>
+        fee.areaName.includes("الاستلام من المكان")
+      );
+
+      return anyPickupFee ? anyPickupFee.fee : 0;
+    }
+    return 0;
+  };
+
+  const getDeliveryFeeId = () => {
+    if (deliveryType === "delivery" && selectedArea) {
+      return selectedArea.id;
+    } else if (deliveryType === "pickup" && selectedBranch) {
+      const branchPickupFee = deliveryFees.find(
+        (fee) =>
+          fee.areaName.includes("الاستلام من المكان") &&
+          fee.branchId === selectedBranch.id
+      );
+
+      if (branchPickupFee) {
+        return branchPickupFee.id;
+      }
+
+      const anyPickupFee = deliveryFees.find((fee) =>
+        fee.areaName.includes("الاستلام من المكان")
+      );
+
+      return anyPickupFee ? anyPickupFee.id : 0;
+    }
+    return 0;
   };
 
   const openAddressesPage = () => {
@@ -807,33 +847,9 @@ export default function Cart() {
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    let deliveryFee = 0;
-
-    if (deliveryType === "delivery" && selectedArea) {
-      deliveryFee = selectedArea.fee;
-    } else if (deliveryType === "pickup" && pickupFee) {
-      deliveryFee = pickupFee.fee;
-    }
+    const deliveryFee = getDeliveryFee();
 
     return subtotal + deliveryFee;
-  };
-
-  const getDeliveryFee = () => {
-    if (deliveryType === "delivery" && selectedArea) {
-      return selectedArea.fee;
-    } else if (deliveryType === "pickup" && pickupFee) {
-      return pickupFee.fee;
-    }
-    return 0;
-  };
-
-  const getDeliveryFeeId = () => {
-    if (deliveryType === "delivery" && selectedArea) {
-      return selectedArea.id;
-    } else if (deliveryType === "pickup" && pickupFee) {
-      return pickupFee.id;
-    }
-    return 0;
   };
 
   const handleCheckout = async () => {
@@ -1855,11 +1871,9 @@ export default function Cart() {
                       <p className="text-green-600 dark:text-green-400 text-xs sm:text-sm">
                         {selectedBranch?.name || "المطعم"}
                       </p>
-                      {pickupFee && (
-                        <p className="text-green-700 dark:text-green-300 text-xs mt-1">
-                          رسوم الاستلام: {pickupFee.fee} ج.م
-                        </p>
-                      )}
+                      <p className="text-green-700 dark:text-green-300 text-xs mt-1">
+                        رسوم الاستلام: {getDeliveryFee().toFixed(2)} ج.م
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -2035,7 +2049,7 @@ export default function Cart() {
                       </>
                     )}
 
-                    {deliveryType === "pickup" && pickupFee && (
+                    {deliveryType === "pickup" && (
                       <>
                         <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-gray-600 dark:text-gray-400">
