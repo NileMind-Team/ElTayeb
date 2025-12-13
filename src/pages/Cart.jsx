@@ -672,7 +672,7 @@ export default function Cart() {
       const cartItem = cartItems.find((item) => item.id === id);
       if (!cartItem) return;
 
-      await axiosInstance.put(`/api/CartItems/Update/${id}`, {
+      await axiosInstance.put(`/api/CartItems/UpdateQuantity/${id}`, {
         quantity: newQuantity,
         note: cartItem.additionalNotes || "",
       });
