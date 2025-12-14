@@ -23,6 +23,7 @@ import {
   FaLink,
   FaDownload,
   FaImage,
+  FaSlidersH,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
@@ -56,6 +57,7 @@ const ProductForm = () => {
     Image: "",
     Description: "",
     IsActive: true,
+    ShowInSlider: false, // تم إضافة هذا الحقل
     // availabilityType: "always",
     Calories: "",
     PreparationTimeStart: "",
@@ -528,6 +530,8 @@ const ProductForm = () => {
             : "",
           Description: product.description || "",
           IsActive: product.isActive !== undefined ? product.isActive : true,
+          ShowInSlider:
+            product.showInSlider !== undefined ? product.showInSlider : false, // تم إضافة هذا الحقل
           // availabilityType: availabilityType, // تم تعليق هذا الحقل
           Calories: product.calories || "",
           PreparationTimeStart: product.preparationTimeStart || "",
@@ -595,6 +599,7 @@ const ProductForm = () => {
       formData.BasePrice !== initialFormData.BasePrice ||
       formData.Description !== initialFormData.Description ||
       formData.IsActive !== initialFormData.IsActive ||
+      formData.ShowInSlider !== initialFormData.ShowInSlider || // تم إضافة هذا الحقل
       // formData.availabilityType !== initialFormData.availabilityType ||
       formData.Calories !== initialFormData.Calories ||
       formData.PreparationTimeStart !== initialFormData.PreparationTimeStart ||
@@ -926,6 +931,7 @@ const ProductForm = () => {
       );
       formDataToSend.append("CategoryId", formData.CategoryId.toString());
       formDataToSend.append("IsActive", formData.IsActive.toString());
+      formDataToSend.append("ShowInSlider", formData.ShowInSlider.toString()); // تم إضافة هذا الحقل
 
       if (formData.Calories) {
         formDataToSend.append("Calories", formData.Calories.toString());
@@ -1350,6 +1356,78 @@ const ProductForm = () => {
                           <span className="text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300">
                             غير نشط
                           </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* حقل ShowInSlider الجديد */}
+                    <div>
+                      <label className="block text-xs sm:text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 mb-1 xs:mb-1.5 sm:mb-2">
+                        عرض في السلايدر
+                      </label>
+                      <div className="flex gap-3 bg-gray-50/80 dark:bg-gray-600/80 rounded-lg p-2 xs:p-3 border border-gray-200 dark:border-gray-500">
+                        <label className="flex-1 flex items-center justify-center gap-2 cursor-pointer p-2 xs:p-3 rounded-lg transition-all duration-200 border-2 border-transparent hover:border-[#E41E26]/30">
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              name="ShowInSlider"
+                              checked={formData.ShowInSlider === true}
+                              onChange={() =>
+                                setFormData({ ...formData, ShowInSlider: true })
+                              }
+                              className="sr-only"
+                            />
+                            <div
+                              className={`w-4 h-4 xs:w-5 xs:h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                                formData.ShowInSlider === true
+                                  ? "border-[#E41E26] bg-[#E41E26]"
+                                  : "border-gray-400 bg-white dark:bg-gray-500"
+                              }`}
+                            >
+                              {formData.ShowInSlider === true && (
+                                <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-white rounded-full"></div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <FaSlidersH className="text-[#E41E26] text-xs xs:text-sm" />
+                            <span className="text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300">
+                              عرض
+                            </span>
+                          </div>
+                        </label>
+                        <label className="flex-1 flex items-center justify-center gap-2 cursor-pointer p-2 xs:p-3 rounded-lg transition-all duration-200 border-2 border-transparent hover:border-[#E41E26]/30">
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              name="ShowInSlider"
+                              checked={formData.ShowInSlider === false}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  ShowInSlider: false,
+                                })
+                              }
+                              className="sr-only"
+                            />
+                            <div
+                              className={`w-4 h-4 xs:w-5 xs:h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                                formData.ShowInSlider === false
+                                  ? "border-[#E41E26] bg-[#E41E26]"
+                                  : "border-gray-400 bg-white dark:bg-gray-500"
+                              }`}
+                            >
+                              {formData.ShowInSlider === false && (
+                                <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-white rounded-full"></div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <FaTimes className="text-gray-500 text-xs xs:text-sm" />
+                            <span className="text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300">
+                              إخفاء
+                            </span>
+                          </div>
                         </label>
                       </div>
                     </div>
