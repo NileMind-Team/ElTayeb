@@ -26,6 +26,7 @@ import {
   FaStickyNote,
   FaInfoCircle,
   FaListAlt,
+  FaTruck,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
@@ -70,42 +71,49 @@ export default function MyOrders() {
     return date;
   };
 
-  // دالة لحساب السعر النهائي لكل منتج (بعد الاضافات وخصم المنتج)
   const calculateItemFinalPrice = (item) => {
     if (!item) return 0;
 
-    // السعر الأساسي للمنتج
     const basePrice =
       item.menuItemBasePriceSnapshotAtOrder > 0
         ? item.menuItemBasePriceSnapshotAtOrder
-        : item.menuItem?.basePrice || item.basePriceAtOrder || 0;
+        : item.menuItem?.basePrice ||
+          item.basePriceAtOrder ||
+          item.basePriceSnapshot ||
+          0;
 
-    // اجمالي الاضافات
     const optionsTotal =
       item.options?.reduce(
         (sum, option) => sum + (option.optionPriceAtOrder || 0),
         0
       ) || 0;
 
-    // خصم المنتج (إن وجد)
     const itemDiscount = item.totalDiscount || 0;
 
-    // حساب السعر النهائي للمنتج الواحد
     const itemPriceBeforeDiscount =
       (basePrice + optionsTotal) * (item.quantity || 1);
     const itemFinalPrice = itemPriceBeforeDiscount - itemDiscount;
 
-    return Math.max(itemFinalPrice, 0); // التأكد من عدم ظهور سعر سالب
+    return Math.max(itemFinalPrice, 0);
   };
 
-  const calculatePricesFromItems = (items) => {
-    if (!items || items.length === 0) {
+  const calculatePricesFromOrderDetails = (orderDetails) => {
+    if (
+      !orderDetails ||
+      !orderDetails.items ||
+      orderDetails.items.length === 0
+    ) {
       return {
-        subtotal: 0,
+        subtotal: orderDetails?.totalWithoutFee || 0,
         totalAdditions: 0,
-        totalDiscount: 0,
-        deliveryFee: 0,
-        totalWithFee: 0,
+        totalDiscount: orderDetails?.totalDiscount || 0,
+        totalBeforeDiscount: orderDetails?.totalWithoutFee || 0,
+        totalAfterDiscountBeforeDelivery:
+          (orderDetails?.totalWithoutFee || 0) -
+          (orderDetails?.totalDiscount || 0),
+        deliveryFee:
+          orderDetails?.deliveryCost || orderDetails?.deliveryFee?.fee || 0,
+        totalWithFee: orderDetails?.totalWithFee || 0,
       };
     }
 
@@ -113,17 +121,18 @@ export default function MyOrders() {
     let totalAdditions = 0;
     let totalDiscount = 0;
 
-    items.forEach((item) => {
+    orderDetails.items.forEach((item) => {
       const basePrice =
         item.menuItemBasePriceSnapshotAtOrder > 0
           ? item.menuItemBasePriceSnapshotAtOrder
-          : item.menuItem?.basePrice || 0;
+          : item.basePriceSnapshot || item.menuItem?.basePrice || 0;
 
-      subtotal += basePrice * item.quantity;
+      subtotal += basePrice * (item.quantity || 1);
 
       if (item.options && item.options.length > 0) {
         item.options.forEach((option) => {
-          totalAdditions += option.optionPriceAtOrder || 0;
+          totalAdditions +=
+            (option.optionPriceAtOrder || 0) * (item.quantity || 1);
         });
       }
 
@@ -132,12 +141,21 @@ export default function MyOrders() {
       }
     });
 
+    const totalBeforeDiscount = subtotal + totalAdditions;
+    const totalAfterDiscountBeforeDelivery =
+      totalBeforeDiscount - totalDiscount;
+    const deliveryFee =
+      orderDetails.deliveryCost || orderDetails.deliveryFee?.fee || 0;
+    const totalWithFee = totalAfterDiscountBeforeDelivery + deliveryFee;
+
     return {
       subtotal,
       totalAdditions,
       totalDiscount,
-      deliveryFee: 0,
-      totalWithFee: 0,
+      totalBeforeDiscount,
+      totalAfterDiscountBeforeDelivery,
+      deliveryFee,
+      totalWithFee,
     };
   };
 
@@ -813,35 +831,29 @@ export default function MyOrders() {
           ...item,
           menuItemImageUrlSnapshotAtOrder:
             item.menuItemImageUrlSnapshotAtOrder ||
+            item.imageUrlSnapshot ||
             (item.menuItem ? item.menuItem.imageUrl : null),
           menuItemNameSnapshotAtOrder:
             item.menuItemNameSnapshotAtOrder ||
+            item.nameSnapshot ||
             (item.menuItem ? item.menuItem.name : "عنصر غير معروف"),
           menuItemDescriptionAtOrder:
             item.menuItemDescriptionAtOrder ||
+            item.descriptionSnapshot ||
             (item.menuItem ? item.menuItem.description : ""),
           menuItemBasePriceSnapshotAtOrder:
             item.menuItemBasePriceSnapshotAtOrder > 0
               ? item.menuItemBasePriceSnapshotAtOrder
-              : item.menuItem
-              ? item.menuItem.basePrice
-              : 0,
+              : item.basePriceSnapshot || item.menuItem?.basePrice || 0,
           totalPrice:
             item.totalPrice < 0 ? Math.abs(item.totalPrice) : item.totalPrice,
         }));
       }
 
-      if (details && details.items && details.items.length > 0) {
-        const calculatedPrices = calculatePricesFromItems(details.items);
-        details.calculatedSubtotal = calculatedPrices.subtotal;
-        details.calculatedTotalAdditions = calculatedPrices.totalAdditions;
-        details.calculatedTotalDiscount = calculatedPrices.totalDiscount;
-        details.calculatedDeliveryFee = details.deliveryCost || 0;
-        details.calculatedTotalWithFee =
-          calculatedPrices.subtotal +
-          calculatedPrices.totalAdditions +
-          details.calculatedDeliveryFee -
-          calculatedPrices.totalDiscount;
+      // حساب الأسعار من تفاصيل الطلب
+      if (details) {
+        const calculatedPrices = calculatePricesFromOrderDetails(details);
+        details.calculatedPrices = calculatedPrices;
       }
 
       setOrderDetails(details);
@@ -1982,21 +1994,24 @@ export default function MyOrders() {
 
                               const imageUrl =
                                 item.menuItemImageUrlSnapshotAtOrder ||
+                                item.imageUrlSnapshot ||
                                 item.menuItem?.imageUrl;
                               const itemName =
                                 item.menuItemNameSnapshotAtOrder ||
+                                item.nameSnapshot ||
                                 item.menuItem?.name ||
                                 "عنصر غير معروف";
                               const itemDescription =
                                 item.menuItemDescriptionAtOrder ||
+                                item.descriptionSnapshot ||
                                 item.menuItem?.description ||
                                 "";
                               const basePrice =
                                 item.menuItemBasePriceSnapshotAtOrder > 0
                                   ? item.menuItemBasePriceSnapshotAtOrder
-                                  : item.menuItem
-                                  ? item.menuItem.basePrice
-                                  : 0;
+                                  : item.basePriceSnapshot ||
+                                    item.menuItem?.basePrice ||
+                                    0;
                               // eslint-disable-next-line no-unused-vars
                               const totalPrice =
                                 item.totalPrice < 0
@@ -2196,20 +2211,24 @@ export default function MyOrders() {
                             </span>
                             <span className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200">
                               ج.م{" "}
-                              {orderDetails.calculatedSubtotal?.toFixed(2) ||
-                                "0.00"}
+                              {(
+                                orderDetails.calculatedPrices?.subtotal ||
+                                orderDetails.totalWithoutFee ||
+                                0
+                              ).toFixed(2)}
                             </span>
                           </div>
 
-                          {orderDetails.calculatedTotalAdditions > 0 && (
+                          {orderDetails.calculatedPrices?.totalAdditions >
+                            0 && (
                             <div className="flex justify-between items-center text-blue-600 dark:text-blue-400">
                               <span className="flex items-center gap-1 text-sm sm:text-base">
                                 <FaPlusCircle className="w-3 h-3" />
-                                إجمالي الإضافات:
+                                إجمالي الاضافات:
                               </span>
                               <span className="font-medium text-sm sm:text-base">
                                 +ج.م{" "}
-                                {orderDetails.calculatedTotalAdditions?.toFixed(
+                                {orderDetails.calculatedPrices?.totalAdditions?.toFixed(
                                   2
                                 ) || "0.00"}
                               </span>
@@ -2218,12 +2237,67 @@ export default function MyOrders() {
 
                           <div className="flex justify-between items-center">
                             <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                              الإجمالي قبل التوصيل:
+                            </span>
+                            <span className="font-medium text-sm sm:text-base text-blue-600 dark:text-blue-400">
+                              ج.م{" "}
+                              {(
+                                orderDetails.calculatedPrices
+                                  ?.totalBeforeDiscount ||
+                                (orderDetails.totalWithoutFee || 0) +
+                                  (orderDetails.calculatedPrices
+                                    ?.totalAdditions || 0)
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {(orderDetails.calculatedPrices?.totalDiscount > 0 ||
+                            orderDetails.totalDiscount > 0) && (
+                            <div className="flex justify-between items-center text-green-600 dark:text-green-400">
+                              <span className="flex items-center gap-1 text-sm sm:text-base">
+                                <FaTag className="w-3 h-3" />
+                                الخصم الكلي:
+                              </span>
+                              <span className="font-medium text-sm sm:text-base">
+                                -ج.م{" "}
+                                {(
+                                  orderDetails.calculatedPrices
+                                    ?.totalDiscount ||
+                                  orderDetails.totalDiscount ||
+                                  0
+                                ).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                              الإجمالي بعد الخصم وقبل التوصيل:
+                            </span>
+                            <span className="font-medium text-sm sm:text-base text-green-600 dark:text-green-400">
+                              ج.م{" "}
+                              {(
+                                orderDetails.calculatedPrices
+                                  ?.totalAfterDiscountBeforeDelivery ||
+                                (orderDetails.totalWithoutFee || 0) -
+                                  (orderDetails.totalDiscount || 0)
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                               رسوم التوصيل:
                             </span>
-                            <span className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200">
+                            <span className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                              <FaTruck className="text-[#E41E26]" />
                               ج.م{" "}
-                              {orderDetails.calculatedDeliveryFee?.toFixed(2) ||
-                                "0.00"}
+                              {(
+                                orderDetails.calculatedPrices?.deliveryFee ||
+                                orderDetails.deliveryCost ||
+                                orderDetails.deliveryFee?.fee ||
+                                0
+                              ).toFixed(2)}
                             </span>
                           </div>
 
@@ -2238,45 +2312,37 @@ export default function MyOrders() {
                             </div>
                           )}
 
-                          {orderDetails.calculatedTotalDiscount > 0 && (
-                            <div className="flex justify-between items-center text-green-600 dark:text-green-400">
-                              <span className="flex items-center gap-1 text-sm sm:text-base">
-                                <FaTag className="w-3 h-3" />
-                                إجمالي الخصم:
-                              </span>
-                              <span className="font-medium text-sm sm:text-base">
-                                -ج.م{" "}
-                                {orderDetails.calculatedTotalDiscount?.toFixed(
-                                  2
-                                ) || "0.00"}
-                              </span>
-                            </div>
-                          )}
-
                           <div className="border-t pt-2 sm:pt-3 mt-2 sm:mt-3">
                             <div className="flex justify-between items-center font-bold text-base sm:text-lg">
                               <span className="text-gray-800 dark:text-gray-200">
-                                الإجمالي:
+                                الإجمالي النهائي:
                               </span>
                               <span className="text-[#E41E26]">
                                 ج.م{" "}
                                 {(
-                                  orderDetails.calculatedTotalWithFee ||
+                                  orderDetails.calculatedPrices?.totalWithFee ||
                                   orderDetails.totalWithFee ||
-                                  0
+                                  (orderDetails.totalWithoutFee || 0) -
+                                    (orderDetails.totalDiscount || 0) +
+                                    (orderDetails.deliveryCost ||
+                                      orderDetails.deliveryFee?.fee ||
+                                      0)
                                 ).toFixed(2)}
                               </span>
                             </div>
 
-                            {orderDetails.calculatedTotalDiscount > 0 && (
+                            {(orderDetails.calculatedPrices?.totalDiscount >
+                              0 ||
+                              orderDetails.totalDiscount > 0) && (
                               <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 <span className="text-green-600 dark:text-green-400">
                                   لقد وفرت ج.م{" "}
-                                  {orderDetails.calculatedTotalDiscount?.toFixed(
-                                    2
-                                  ) ||
-                                    orderDetails.totalDiscount?.toFixed(2) ||
-                                    "0.00"}
+                                  {(
+                                    orderDetails.calculatedPrices
+                                      ?.totalDiscount ||
+                                    orderDetails.totalDiscount ||
+                                    0
+                                  ).toFixed(2)}
                                 </span>
                               </div>
                             )}
