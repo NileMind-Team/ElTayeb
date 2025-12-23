@@ -253,9 +253,13 @@ const Home = () => {
         filters: buildFiltersArray(),
       };
 
+      const queryParams =
+        selectedCategory === "offers" ? { isHasOffer: true } : {};
+
       const response = await axiosInstance.post(
         "/api/MenuItems/GetAll",
-        requestBody
+        requestBody,
+        { params: queryParams }
       );
 
       const responseData = response.data;

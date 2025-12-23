@@ -27,10 +27,42 @@ import axiosInstance from "../api/axiosInstance";
 const translateOfferErrorMessage = (errorData, useHTML = true) => {
   if (!errorData) return "حدث خطأ غير معروف";
 
+  // Handle the new error structure (array format)
+  if (Array.isArray(errorData.errors)) {
+    const errorMessages = errorData.errors.map((error) => {
+      if (error.code === "ItemOffer.ItemOfferAlreadyExists") {
+        return "هناك عرض نشط لهذا العنصر بالفعل.";
+      }
+      return error.description || error.code;
+    });
+
+    if (errorMessages.length > 1) {
+      if (useHTML) {
+        const htmlMessages = errorMessages.map(
+          (msg) =>
+            `<div style="direction: rtl; text-align: right; margin-bottom: 8px; padding-right: 15px; position: relative;">
+             ${msg}
+             <span style="position: absolute; right: 0; top: 0;">-</span>
+           </div>`
+        );
+        return htmlMessages.join("");
+      } else {
+        return errorMessages.map((msg) => `${msg} -`).join("<br>");
+      }
+    } else if (errorMessages.length === 1) {
+      return errorMessages[0];
+    } else {
+      return "بيانات غير صالحة";
+    }
+  }
+
   if (errorData.errors && typeof errorData.errors === "object") {
     const errorMessages = [];
 
-    if (errorData.errors.DiscountValue) {
+    if (
+      errorData.errors.DiscountValue &&
+      Array.isArray(errorData.errors.DiscountValue)
+    ) {
       errorData.errors.DiscountValue.forEach((msg) => {
         if (msg.toLowerCase().includes("greater than 0")) {
           errorMessages.push("قيمة الخصم يجب أن تكون أكبر من الصفر");
@@ -49,7 +81,7 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
       });
     }
 
-    if (errorData.errors.EndDate) {
+    if (errorData.errors.EndDate && Array.isArray(errorData.errors.EndDate)) {
       errorData.errors.EndDate.forEach((msg) => {
         if (msg.toLowerCase().includes("after start date")) {
           errorMessages.push("تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
@@ -61,7 +93,10 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
       });
     }
 
-    if (errorData.errors.StartDate) {
+    if (
+      errorData.errors.StartDate &&
+      Array.isArray(errorData.errors.StartDate)
+    ) {
       errorData.errors.StartDate.forEach((msg) => {
         if (msg.toLowerCase().includes("required")) {
           errorMessages.push("تاريخ البداية مطلوب");
@@ -73,7 +108,10 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
       });
     }
 
-    if (errorData.errors.MenuItemId) {
+    if (
+      errorData.errors.MenuItemId &&
+      Array.isArray(errorData.errors.MenuItemId)
+    ) {
       errorData.errors.MenuItemId.forEach((msg) => {
         if (msg.toLowerCase().includes("required")) {
           errorMessages.push("العنصر مطلوب");
@@ -88,7 +126,10 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
       });
     }
 
-    if (errorData.errors.BranchesIds) {
+    if (
+      errorData.errors.BranchesIds &&
+      Array.isArray(errorData.errors.BranchesIds)
+    ) {
       errorData.errors.BranchesIds.forEach((msg) => {
         if (
           msg.toLowerCase().includes("required") ||
@@ -116,9 +157,20 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
           "BranchesIds",
         ].includes(key)
       ) {
-        errorData.errors[key].forEach((msg) => {
-          errorMessages.push(msg);
-        });
+        const errorValue = errorData.errors[key];
+        if (Array.isArray(errorValue)) {
+          errorValue.forEach((msg) => {
+            errorMessages.push(msg);
+          });
+        } else if (typeof errorValue === "string") {
+          errorMessages.push(errorValue);
+        } else if (errorValue && typeof errorValue === "object") {
+          Object.values(errorValue).forEach((nestedMsg) => {
+            if (typeof nestedMsg === "string") {
+              errorMessages.push(nestedMsg);
+            }
+          });
+        }
       }
     });
 
@@ -153,18 +205,19 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
     if (msg.includes("unauthorized") || msg.includes("forbidden")) {
       return "ليس لديك صلاحية للقيام بهذا الإجراء";
     }
+    if (msg.includes("conflict")) {
+      return "هناك تعارض في البيانات. قد يكون هناك عرض نشط للعنصر بالفعل.";
+    }
     return errorData.message;
   }
 
   return "حدث خطأ غير متوقع أثناء حفظ العرض";
 };
 
-// دالة لضبط الوقت عند الإرسال (طرح ساعتين)
 const adjustTimeForAPI = (dateString) => {
   if (!dateString) return "";
 
   const date = new Date(dateString);
-  // طرح ساعتين (7200000 ميلي ثانية)
   date.setTime(date.getTime() - 2 * 60 * 60 * 1000);
 
   const year = date.getFullYear();
@@ -177,12 +230,10 @@ const adjustTimeForAPI = (dateString) => {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 };
 
-// دالة لضبط الوقت عند الاستقبال (إضافة ساعتين)
 const adjustTimeFromAPI = (dateString) => {
   if (!dateString) return new Date();
 
   const date = new Date(dateString);
-  // إضافة ساعتين (7200000 ميلي ثانية)
   date.setTime(date.getTime() + 2 * 60 * 60 * 1000);
 
   return date;
