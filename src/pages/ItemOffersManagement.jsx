@@ -159,6 +159,35 @@ const translateOfferErrorMessage = (errorData, useHTML = true) => {
   return "حدث خطأ غير متوقع أثناء حفظ العرض";
 };
 
+// دالة لضبط الوقت عند الإرسال (طرح ساعتين)
+const adjustTimeForAPI = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+  // طرح ساعتين (7200000 ميلي ثانية)
+  date.setTime(date.getTime() - 2 * 60 * 60 * 1000);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+};
+
+// دالة لضبط الوقت عند الاستقبال (إضافة ساعتين)
+const adjustTimeFromAPI = (dateString) => {
+  if (!dateString) return new Date();
+
+  const date = new Date(dateString);
+  // إضافة ساعتين (7200000 ميلي ثانية)
+  date.setTime(date.getTime() + 2 * 60 * 60 * 1000);
+
+  return date;
+};
+
 export default function ItemOffersManagement() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -291,6 +320,10 @@ export default function ItemOffersManagement() {
               `/api/MenuItems/Get/${offer.menuItemId}`
             );
 
+            // تعديل التواريخ الواردة من الباكيند (إضافة ساعتين)
+            const adjustedStartDate = adjustTimeFromAPI(offer.startDate);
+            const adjustedEndDate = adjustTimeFromAPI(offer.endDate);
+
             let branchNames = [];
             if (offer.branchesIds && offer.branchesIds.length > 0) {
               branchNames = offer.branchesIds.map((branchId) => {
@@ -305,6 +338,8 @@ export default function ItemOffersManagement() {
               ...offer,
               menuItem: menuItemResponse.data,
               branchNames: branchNames,
+              startDate: adjustedStartDate,
+              endDate: adjustedEndDate,
             };
           } catch (error) {
             console.error(`خطأ في جلب العنصر ${offer.menuItemId}:`, error);
@@ -312,6 +347,8 @@ export default function ItemOffersManagement() {
               ...offer,
               menuItem: null,
               branchNames: [],
+              startDate: adjustTimeFromAPI(offer.startDate),
+              endDate: adjustTimeFromAPI(offer.endDate),
             };
           }
         })
@@ -341,8 +378,8 @@ export default function ItemOffersManagement() {
 
         const offer = item.itemOffer;
         const now = new Date();
-        const startDate = new Date(offer.startDate);
-        const endDate = new Date(offer.endDate);
+        const startDate = adjustTimeFromAPI(offer.startDate);
+        const endDate = adjustTimeFromAPI(offer.endDate);
 
         return !(offer.isEnabled && startDate <= now && endDate >= now);
       });
@@ -434,14 +471,8 @@ export default function ItemOffersManagement() {
       dateObj.setHours(0, 0, 0, 0);
     }
 
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const hour = String(dateObj.getHours()).padStart(2, "0");
-    const minute = String(dateObj.getMinutes()).padStart(2, "0");
-    const second = String(dateObj.getSeconds()).padStart(2, "0");
-
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+    // استخدام دالة ضبط الوقت للإرسال (طرح ساعتين)
+    return adjustTimeForAPI(dateObj.toISOString());
   };
 
   const handleSubmit = async (e) => {
@@ -543,6 +574,7 @@ export default function ItemOffersManagement() {
   };
 
   const handleEdit = (offer) => {
+    // التواريخ هنا ستكون معدلة مسبقاً (مضاف لها ساعتين)
     const startDateObj = new Date(offer.startDate);
     const endDateObj = new Date(offer.endDate);
 
@@ -610,12 +642,13 @@ export default function ItemOffersManagement() {
     const offer = offers.find((o) => o.id === id);
     if (!offer) return;
 
+    // نستخدم التواريخ المعدلة (مضاف لها ساعتين) لكن عند الإرسال سيتم طرح ساعتين
     const offerData = {
       menuItemId: offer.menuItemId,
       isPercentage: offer.isPercentage,
       discountValue: offer.discountValue,
-      startDate: offer.startDate,
-      endDate: offer.endDate,
+      startDate: adjustTimeForAPI(offer.startDate), // طرح ساعتين عند الإرسال
+      endDate: adjustTimeForAPI(offer.endDate), // طرح ساعتين عند الإرسال
       isEnabled: !offer.isEnabled,
       branchesIds: offer.branchesIds || branches.map((branch) => branch.id),
     };
