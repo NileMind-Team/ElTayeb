@@ -45,7 +45,6 @@ export default function AdminUsers() {
     checkAdminAndFetchUsers,
     filterUsers,
     handleAssignRole,
-    handleDelete,
     handleToggleStatus,
     handleSubmitUser,
     getSortedUsers,

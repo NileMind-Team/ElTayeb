@@ -59,6 +59,74 @@ const Home = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const navigate = useNavigate();
 
+  const isMobile = () => {
+    return window.innerWidth <= 768;
+  };
+
+  // Function to show notification based on device and content
+  const showNotification = (type, title, text, options = {}) => {
+    // Always use Swal for notifications with buttons
+    if (options.showConfirmButton || options.showCancelButton) {
+      Swal.fire({
+        icon: type,
+        title: title,
+        text: text,
+        timer: options.timer || null,
+        showConfirmButton: options.showConfirmButton || false,
+        confirmButtonText: options.confirmButtonText,
+        showCancelButton: options.showCancelButton,
+        cancelButtonText: options.cancelButtonText,
+        confirmButtonColor: "#E41E26",
+        cancelButtonColor: "#6B7280",
+        ...options.swalOptions,
+      });
+      return;
+    }
+
+    // Use toast for simple notifications on mobile only
+    if (isMobile()) {
+      const toastOptions = {
+        position: "top-right",
+        autoClose: options.timer || 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+        rtl: true,
+        style: {
+          width: "70%",
+          margin: "10px auto",
+          borderRadius: "12px",
+          fontSize: "14px",
+          fontWeight: "500",
+          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+          maxWidth: "400px",
+          minWidth: "250px",
+        },
+        ...options.toastOptions,
+      };
+
+      if (type === "success") {
+        toast.success(text, toastOptions);
+      } else if (type === "error") {
+        toast.error(text, toastOptions);
+      } else if (type === "warning") {
+        toast.warning(text, toastOptions);
+      }
+    } else {
+      Swal.fire({
+        icon: type,
+        title: title,
+        text: text,
+        timer: options.timer || 2000,
+        showConfirmButton: false,
+        confirmButtonColor: "#E41E26",
+        ...options.swalOptions,
+      });
+    }
+  };
+
   // Function to preload images
   const preloadImages = (imageUrls) => {
     return new Promise((resolve) => {
@@ -211,17 +279,14 @@ const Home = () => {
         setCategories(transformedCategories);
       } catch (error) {
         console.error("Error fetching categories:", error);
-        Swal.fire({
-          icon: "error",
-          title: "خطأ",
-          text: "فشل في تحميل التصنيفات",
+        showNotification("error", "خطأ", "فشل في تحميل التصنيفات", {
           timer: 2000,
-          showConfirmButton: false,
         });
       }
     };
 
     fetchCategories();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -331,12 +396,8 @@ const Home = () => {
       setProductsLoading(false);
     } catch (error) {
       console.error("Error fetching products:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في تحميل المنتجات",
+      showNotification("error", "خطأ", "فشل في تحميل المنتجات", {
         timer: 2000,
-        showConfirmButton: false,
       });
       setProducts([]);
       setFilteredProducts([]);
@@ -463,15 +524,12 @@ const Home = () => {
         await axiosInstance.delete(`/api/Favorites/Delete/${favoriteItem.id}`);
         setFavorites(favorites.filter((fav) => fav.menuItemId !== product.id));
 
-        toast.success(`تم إزالة ${product.name} من المفضلة`, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
+        showNotification(
+          "success",
+          "تم الإزالة",
+          `تم إزالة ${product.name} من المفضلة`,
+          { timer: 1500 }
+        );
       } else {
         await axiosInstance.post("/api/Favorites/Add", {
           menuItemId: product.id,
@@ -480,27 +538,16 @@ const Home = () => {
         const response = await axiosInstance.get("/api/Favorites/GetAll");
         setFavorites(response.data);
 
-        toast.success(`تم إضافة ${product.name} إلى المفضلة`, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
+        showNotification(
+          "success",
+          "تم الإضافة",
+          `تم إضافة ${product.name} إلى المفضلة`,
+          { timer: 1500 }
+        );
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
-      toast.error("فشل في تحديث المفضلة", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-      });
+      showNotification("error", "خطأ", "فشل في تحديث المفضلة", { timer: 2000 });
     }
   };
 
@@ -565,13 +612,12 @@ const Home = () => {
     }
 
     if (!product.isActive) {
-      Swal.fire({
-        icon: "error",
-        title: "المنتج غير متوفر",
-        text: `${product.name} غير متوفر حالياً`,
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "error",
+        "المنتج غير متوفر",
+        `${product.name} غير متوفر حالياً`,
+        { timer: 2000 }
+      );
       return;
     }
 
@@ -584,13 +630,12 @@ const Home = () => {
 
       await fetchCartItemsCount();
 
-      Swal.fire({
-        icon: "success",
-        title: "تم الإضافة إلى السلة!",
-        text: `تم إضافة ${product.name} إلى سلة التسوق`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "success",
+        "تم الإضافة إلى السلة!",
+        `تم إضافة ${product.name} إلى سلة التسوق`,
+        { timer: 1500 }
+      );
     } catch (error) {
       console.error("Error adding to cart:", error);
 
@@ -635,12 +680,8 @@ const Home = () => {
         }
       }
 
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في إضافة المنتج إلى السلة",
+      showNotification("error", "خطأ", "فشل في إضافة المنتج إلى السلة", {
         timer: 2000,
-        showConfirmButton: false,
       });
     }
   };
@@ -698,22 +739,14 @@ const Home = () => {
           await axiosInstance.delete(`/api/MenuItems/Delete/${productId}`);
 
           setProducts(products.filter((product) => product.id !== productId));
-          Swal.fire({
-            title: "تم الحذف!",
-            text: "تم حذف المنتج بنجاح",
-            icon: "success",
+          showNotification("success", "تم الحذف!", "تم حذف المنتج بنجاح", {
             timer: 2000,
-            showConfirmButton: false,
           });
           fetchProducts();
         } catch (error) {
           console.error("Error deleting product:", error);
-          Swal.fire({
-            icon: "error",
-            title: "خطأ",
-            text: "فشل في حذف المنتج",
+          showNotification("error", "خطأ", "فشل في حذف المنتج", {
             timer: 2000,
-            showConfirmButton: false,
           });
         }
       }
@@ -729,13 +762,12 @@ const Home = () => {
         (cat) => cat.originalId === productToToggle.categoryId
       );
       if (category && !category.isActive) {
-        Swal.fire({
-          icon: "error",
-          title: "لا يمكن التعديل",
-          text: "لا يمكن تعديل حالة المنتج لأن الفئة معطلة",
-          timer: 2000,
-          showConfirmButton: false,
-        });
+        showNotification(
+          "error",
+          "لا يمكن التعديل",
+          "لا يمكن تعديل حالة المنتج لأن الفئة معطلة",
+          { timer: 2000 }
+        );
         return;
       }
     }
@@ -747,23 +779,17 @@ const Home = () => {
 
       fetchProducts();
 
-      Swal.fire({
-        icon: "success",
-        title: "تم تحديث الحالة!",
-        text: `تم ${
-          products.find((p) => p.id === productId).isActive ? "تعطيل" : "تفعيل"
-        } المنتج`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
+      const product = products.find((p) => p.id === productId);
+      showNotification(
+        "success",
+        "تم تحديث الحالة!",
+        `تم ${product.isActive ? "تعطيل" : "تفعيل"} المنتج`,
+        { timer: 1500 }
+      );
     } catch (error) {
       console.error("Error updating product status:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في تحديث حالة المنتج",
+      showNotification("error", "خطأ", "فشل في تحديث حالة المنتج", {
         timer: 2000,
-        showConfirmButton: false,
       });
     }
   };
@@ -774,13 +800,12 @@ const Home = () => {
 
   const handleEditCategory = (category) => {
     if (category.id === "all" || category.id === "offers") {
-      Swal.fire({
-        icon: "error",
-        title: "لا يمكن التعديل",
-        text: "لا يمكن تعديل هذا التصنيف",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "error",
+        "لا يمكن التعديل",
+        "لا يمكن تعديل هذا التصنيف",
+        { timer: 2000 }
+      );
       return;
     }
     setEditingCategory({ ...category });
@@ -789,24 +814,17 @@ const Home = () => {
 
   const handleSaveCategory = async () => {
     if (!editingCategory.name.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "اسم التصنيف مطلوب",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification("error", "خطأ", "اسم التصنيف مطلوب", { timer: 2000 });
       return;
     }
 
     if (editingCategory.id === "all" || editingCategory.id === "offers") {
-      Swal.fire({
-        icon: "error",
-        title: "لا يمكن التعديل",
-        text: "لا يمكن تعديل هذا التصنيف",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "error",
+        "لا يمكن التعديل",
+        "لا يمكن تعديل هذا التصنيف",
+        { timer: 2000 }
+      );
       return;
     }
 
@@ -826,34 +844,18 @@ const Home = () => {
       );
 
       setEditingCategory(null);
-      Swal.fire({
-        icon: "success",
-        title: "تم التحديث!",
-        text: "تم تحديث التصنيف بنجاح",
+      showNotification("success", "تم التحديث!", "تم تحديث التصنيف بنجاح", {
         timer: 1500,
-        showConfirmButton: false,
       });
     } catch (error) {
       console.error("Error updating category:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في تحديث التصنيف",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification("error", "خطأ", "فشل في تحديث التصنيف", { timer: 2000 });
     }
   };
 
   const handleAddCategory = async () => {
     if (!newCategory.name.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "اسم التصنيف مطلوب",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification("error", "خطأ", "اسم التصنيف مطلوب", { timer: 2000 });
       return;
     }
 
@@ -877,33 +879,22 @@ const Home = () => {
       setCategories([...categories, newCat]);
       setNewCategory({ name: "", isActive: true });
 
-      Swal.fire({
-        icon: "success",
-        title: "تم الإضافة!",
-        text: "تم إضافة التصنيف الجديد بنجاح",
-        timer: 1500,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "success",
+        "تم الإضافة!",
+        "تم إضافة التصنيف الجديد بنجاح",
+        { timer: 1500 }
+      );
     } catch (error) {
       console.error("Error adding category:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في إضافة التصنيف",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification("error", "خطأ", "فشل في إضافة التصنيف", { timer: 2000 });
     }
   };
 
   const handleDeleteCategory = async (categoryId) => {
     if (categoryId === "all" || categoryId === "offers") {
-      Swal.fire({
-        icon: "error",
-        title: "لا يمكن الحذف",
-        text: "لا يمكن حذف هذا التصنيف",
+      showNotification("error", "لا يمكن الحذف", "لا يمكن حذف هذا التصنيف", {
         timer: 2000,
-        showConfirmButton: false,
       });
       return;
     }
@@ -947,21 +938,13 @@ const Home = () => {
             setSelectedCategory("all");
           }
 
-          Swal.fire({
-            title: "تم الحذف!",
-            text: "تم حذف التصنيف بنجاح",
-            icon: "success",
+          showNotification("success", "تم الحذف!", "تم حذف التصنيف بنجاح", {
             timer: 2000,
-            showConfirmButton: false,
           });
         } catch (error) {
           console.error("Error deleting category:", error);
-          Swal.fire({
-            icon: "error",
-            title: "خطأ",
-            text: "فشل في حذف التصنيف",
+          showNotification("error", "خطأ", "فشل في حذف التصنيف", {
             timer: 2000,
-            showConfirmButton: false,
           });
         }
       }
@@ -972,13 +955,12 @@ const Home = () => {
     e.stopPropagation();
 
     if (categoryId === "all" || categoryId === "offers") {
-      Swal.fire({
-        icon: "error",
-        title: "لا يمكن التعديل",
-        text: "لا يمكن تعديل هذا التصنيف",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "error",
+        "لا يمكن التعديل",
+        "لا يمكن تعديل هذا التصنيف",
+        { timer: 2000 }
+      );
       return;
     }
 
@@ -995,21 +977,16 @@ const Home = () => {
         )
       );
 
-      Swal.fire({
-        icon: "success",
-        title: "تم تحديث الحالة!",
-        text: `تم ${category.isActive ? "تعطيل" : "تفعيل"} التصنيف`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
+      showNotification(
+        "success",
+        "تم تحديث الحالة!",
+        `تم ${category.isActive ? "تعطيل" : "تفعيل"} التصنيف`,
+        { timer: 1500 }
+      );
     } catch (error) {
       console.error("Error updating category status:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ",
-        text: "فشل في تحديث حالة التصنيف",
+      showNotification("error", "خطأ", "فشل في تحديث حالة التصنيف", {
         timer: 2000,
-        showConfirmButton: false,
       });
     }
   };
@@ -1238,7 +1215,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 font-sans relative overflow-x-hidden">
       <div ref={topOfPageRef}></div>
 
-      {/* Toast Container */}
+      {/* Toast Container - Custom styled for mobile */}
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -1250,7 +1227,27 @@ const Home = () => {
         draggable
         pauseOnHover
         theme="light"
-        style={{ zIndex: 9999 }}
+        style={{
+          zIndex: 9999,
+          width: isMobile() ? "70%" : "auto",
+          maxWidth: "400px",
+          margin: "10px auto",
+        }}
+        toastStyle={{
+          width: "100%",
+          borderRadius: "12px",
+          fontSize: "14px",
+          fontWeight: "500",
+          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+          marginBottom: "10px",
+          minWidth: "250px",
+          maxWidth: "400px",
+          textAlign: "right",
+        }}
+        bodyStyle={{
+          fontFamily: "inherit",
+          padding: "12px 16px",
+        }}
       />
 
       <HeroSwipper />
@@ -1397,13 +1394,12 @@ const Home = () => {
                       <button
                         onClick={(e) => {
                           if (!canToggleProductActive(product)) {
-                            Swal.fire({
-                              icon: "error",
-                              title: "لا يمكن التعديل",
-                              text: "لا يمكن تعديل حالة المنتج لأن الفئة معطلة",
-                              timer: 2000,
-                              showConfirmButton: false,
-                            });
+                            showNotification(
+                              "error",
+                              "لا يمكن التعديل",
+                              "لا يمكن تعديل حالة المنتج لأن الفئة معطلة",
+                              { timer: 2000 }
+                            );
                             return;
                           }
                           handleToggleActive(product.id, e);
