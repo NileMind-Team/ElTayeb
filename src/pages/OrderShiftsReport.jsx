@@ -20,6 +20,27 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format, startOfDay, endOfDay, addHours, parseISO } from "date-fns";
 import axiosInstance from "../api/axiosInstance";
 
+const fetchOrderShifts = async (branchId, day) => {
+  try {
+    if (!branchId || !day) {
+      return [];
+    }
+
+    const params = new URLSearchParams({
+      branchId: branchId.toString(),
+      day: format(day, "yyyy-MM-dd"),
+    });
+
+    const response = await axiosInstance.get(
+      `/api/OrderShifts/GetAll?${params.toString()}`
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching order shifts:", error);
+    throw error;
+  }
+};
+
 const fetchBranches = async () => {
   try {
     const response = await axiosInstance.get("/api/Branches/GetList");
@@ -31,35 +52,38 @@ const fetchBranches = async () => {
 };
 
 const fetchOrdersWithFilter = async (
-  startDate,
-  endDate,
-  shiftName,
+  day,
+  shiftId,
   branchId,
   pageNumber = 1,
   pageSize = 10
 ) => {
   try {
+    if (!day || !branchId) {
+      throw new Error("يرجى تحديد اليوم والفرع أولاً");
+    }
+
     const requestBody = {
       pageNumber: pageNumber,
       pageSize: pageSize,
       filters: [],
     };
 
-    if (startDate && endDate) {
-      const startDateISO = addHours(startOfDay(startDate), 2).toISOString();
-      const endDateISO = addHours(endOfDay(endDate), 2).toISOString();
+    if (day) {
+      let startDateWithTime = startOfDay(day);
+      let endDateWithTime = endOfDay(day);
 
       requestBody.filters.push({
         propertyName: "createdAt",
-        propertyValue: `${startDateISO},${endDateISO}`,
+        propertyValue: `${startDateWithTime.toISOString()},${endDateWithTime.toISOString()}`,
         range: true,
       });
     }
 
-    if (shiftName) {
+    if (shiftId) {
       requestBody.filters.push({
-        propertyName: "orderShift.name",
-        propertyValue: shiftName,
+        propertyName: "orderShift.id",
+        propertyValue: shiftId.toString(),
         range: false,
       });
     }
@@ -87,7 +111,7 @@ const fetchOrdersWithFilter = async (
       !response.data.data ||
       response.data.data.length === 0
     ) {
-      throw new Error("لا توجد بيانات في الفترة المحددة");
+      throw new Error("لا توجد بيانات في اليوم المحدد");
     }
 
     return response.data;
@@ -97,29 +121,26 @@ const fetchOrdersWithFilter = async (
   }
 };
 
-const fetchAllOrdersForPrint = async (
-  startDate,
-  endDate,
-  shiftName,
-  branchId
-) => {
+const fetchAllOrdersForPrint = async (day, shiftId, branchId) => {
   try {
-    if (!startDate || !endDate) {
+    if (!day || !branchId) {
       return [];
     }
 
+    let startDateWithTime = startOfDay(day);
+    let endDateWithTime = endOfDay(day);
+
     const params = new URLSearchParams();
-    if (startDate) {
-      params.append("startRange", format(startDate, "yyyy-MM-dd"));
-    }
-    if (endDate) {
-      params.append("endRange", format(endDate, "yyyy-MM-dd"));
-    }
-    if (shiftName) {
-      params.append("shiftName", shiftName);
+    params.append("startRange", startDateWithTime.toISOString());
+    params.append("endRange", endDateWithTime.toISOString());
+
+    if (branchId) {
+      params.append("branchId", branchId.toString());
     }
 
     console.log(`Fetching print orders with params: ${params.toString()}`);
+    console.log(`Start Range: ${startDateWithTime.toISOString()}`);
+    console.log(`End Range: ${endDateWithTime.toISOString()}`);
 
     const response = await axiosInstance.get(
       `/api/Orders/GetAll?${params.toString()}`
@@ -127,9 +148,9 @@ const fetchAllOrdersForPrint = async (
 
     let orders = response.data || [];
 
-    if (branchId) {
+    if (shiftId) {
       orders = orders.filter(
-        (order) => order.branch?.id === parseInt(branchId)
+        (order) => order.orderShift?.id === parseInt(shiftId)
       );
     }
 
@@ -181,7 +202,8 @@ const formatTime = (timeString) => {
   try {
     if (timeString.includes("T")) {
       const date = parseISO(timeString);
-      return format(date, "HH:mm");
+      const adjustedDate = addHours(date, 2);
+      return format(adjustedDate, "HH:mm");
     }
     if (timeString.includes(":")) {
       return timeString.substring(0, 5);
@@ -194,11 +216,11 @@ const formatTime = (timeString) => {
 
 const OrderShiftsReport = () => {
   const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [shiftName, setShiftName] = useState("صباحي");
+  const [day, setDay] = useState(null);
+  const [shiftId, setShiftId] = useState("");
   const [branchId, setBranchId] = useState("");
   const [branches, setBranches] = useState([]);
+  const [orderShifts, setOrderShifts] = useState([]);
   const [reportData, setReportData] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   // eslint-disable-next-line no-unused-vars
@@ -209,11 +231,6 @@ const OrderShiftsReport = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
-
-  const shiftOptions = [
-    { value: "صباحي", label: "صباحي" },
-    { value: "مسائي", label: "مسائي" },
-  ];
 
   useEffect(() => {
     const loadBranches = async () => {
@@ -229,7 +246,7 @@ const OrderShiftsReport = () => {
     loadBranches();
 
     setSummary({
-      dateRange: "لم يتم تحديد فترة",
+      day: "لم يتم تحديد اليوم",
     });
 
     const savedDarkMode = localStorage.getItem("darkMode");
@@ -255,16 +272,42 @@ const OrderShiftsReport = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const loadOrderShifts = async () => {
+      if (day && branchId) {
+        try {
+          const shifts = await fetchOrderShifts(branchId, day);
+          setOrderShifts(shifts);
+
+          if (shifts.length > 0 && !shiftId) {
+            setShiftId(shifts[0].id.toString());
+          } else {
+            setShiftId("");
+          }
+        } catch (error) {
+          console.error("Error loading order shifts:", error);
+          setOrderShifts([]);
+          setShiftId("");
+        }
+      } else {
+        setOrderShifts([]);
+        setShiftId("");
+      }
+    };
+
+    loadOrderShifts();
+  }, [day, branchId]);
+
   const toggleDropdown = (menu) => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
   const handleFilter = async (page = 1) => {
-    if (!startDate || !endDate) {
+    if (!day) {
       Swal.fire({
         icon: "warning",
-        title: "تاريخ غير مكتمل",
-        text: "يرجى تحديد تاريخ البداية والنهاية أولاً",
+        title: "اليوم غير محدد",
+        text: "يرجى تحديد اليوم أولاً",
         timer: 3000,
         showConfirmButton: false,
         background: "#fff",
@@ -273,13 +316,15 @@ const OrderShiftsReport = () => {
       return;
     }
 
-    if (startDate > endDate) {
+    if (!branchId) {
       Swal.fire({
-        icon: "error",
-        title: "خطأ في التاريخ",
-        text: "تاريخ البداية يجب أن يكون قبل تاريخ النهاية",
+        icon: "warning",
+        title: "الفرع غير محدد",
+        text: "يرجى تحديد الفرع أولاً",
         timer: 3000,
         showConfirmButton: false,
+        background: "#fff",
+        color: "#333",
       });
       return;
     }
@@ -287,10 +332,9 @@ const OrderShiftsReport = () => {
     setLoading(true);
     try {
       const response = await fetchOrdersWithFilter(
-        startDate,
-        endDate,
-        shiftName || null,
-        branchId || null,
+        day,
+        shiftId || null,
+        branchId,
         page,
         10
       );
@@ -302,11 +346,19 @@ const OrderShiftsReport = () => {
       setTotalPrice(response.totalPrice || 0);
       setCurrentPage(response.pageNumber);
 
+      const selectedBranchName =
+        branches.find((b) => b.id === parseInt(branchId))?.name ||
+        "الفرع المحدد";
+
+      const selectedShiftName = shiftId
+        ? orderShifts.find((s) => s.id === parseInt(shiftId))?.name ||
+          "الوردية المحددة"
+        : "جميع الورديات";
+
       setSummary({
-        dateRange: `${format(startDate, "yyyy-MM-dd")} إلى ${format(
-          endDate,
-          "yyyy-MM-dd"
-        )}`,
+        day: format(day, "yyyy-MM-dd"),
+        branch: selectedBranchName,
+        shift: selectedShiftName,
       });
 
       Swal.fire({
@@ -319,8 +371,8 @@ const OrderShiftsReport = () => {
       console.error("Error fetching report data:", error);
 
       const errorMessage =
-        error.message === "لا توجد بيانات في الفترة المحددة"
-          ? "لا توجد بيانات في الفترة المحددة"
+        error.message === "لا توجد بيانات في اليوم المحدد"
+          ? "لا توجد بيانات في اليوم المحدد"
           : "فشل في تحميل بيانات التقرير";
 
       Swal.fire({
@@ -334,13 +386,7 @@ const OrderShiftsReport = () => {
       setReportData([]);
       setTotalPrice(0);
       setSummary({
-        dateRange:
-          startDate && endDate
-            ? `${format(startDate, "yyyy-MM-dd")} إلى ${format(
-                endDate,
-                "yyyy-MM-dd"
-              )}`
-            : "لم يتم تحديد فترة",
+        day: day ? format(day, "yyyy-MM-dd") : "لم يتم تحديد اليوم",
       });
       setTotalPages(1);
       setCurrentPage(1);
@@ -409,11 +455,11 @@ const OrderShiftsReport = () => {
     try {
       setIsPrinting(true);
 
-      if (!startDate || !endDate) {
+      if (!day || !branchId) {
         Swal.fire({
           icon: "warning",
-          title: "تاريخ غير مكتمل",
-          text: "يرجى تحديد تاريخ البداية والنهاية أولاً",
+          title: "بيانات غير مكتملة",
+          text: "يرجى تحديد اليوم والفرع أولاً",
           timer: 2000,
           showConfirmButton: false,
         });
@@ -422,12 +468,7 @@ const OrderShiftsReport = () => {
       }
 
       try {
-        const allOrders = await fetchAllOrdersForPrint(
-          startDate,
-          endDate,
-          shiftName,
-          branchId
-        );
+        const allOrders = await fetchAllOrdersForPrint(day, shiftId, branchId);
 
         if (allOrders.length === 0) {
           Swal.fire({
@@ -449,11 +490,13 @@ const OrderShiftsReport = () => {
         const selectedBranchName = branchId
           ? branches.find((b) => b.id === parseInt(branchId))?.name ||
             "الفرع المحدد"
-          : "جميع الفروع";
+          : "الفرع المحدد";
 
-        const selectedShiftLabel = shiftName
-          ? shiftOptions.find((s) => s.value === shiftName)?.label || shiftName
-          : "صباحي";
+        const selectedShiftName = shiftId
+          ? orderShifts.find((s) => s.id === parseInt(shiftId))?.name ||
+            "الوردية المحددة"
+          : "جميع الورديات";
+
         const printContent = `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -584,24 +627,15 @@ const OrderShiftsReport = () => {
 
 <div class="print-header">
   <h1>تقرير الورديات - Chicken One</h1>
-  <h2>${selectedShiftLabel} - ${selectedBranchName}</h2>
+  <h2>${selectedShiftName} - ${selectedBranchName}</h2>
   <p>نظام إدارة المطاعم - تقرير حسب الورديات</p>
 </div>
 
 <div class="print-info">
   <div>تاريخ التقرير: ${new Date().toLocaleDateString("ar-EG")}</div>
-  ${
-    startDate
-      ? `<div>من: ${new Date(startDate).toLocaleDateString("ar-EG")}</div>`
-      : ""
-  }
-  ${
-    endDate
-      ? `<div>إلى: ${new Date(endDate).toLocaleDateString("ar-EG")}</div>`
-      : ""
-  }
+  ${day ? `<div>اليوم: ${new Date(day).toLocaleDateString("ar-EG")}</div>` : ""}
   <div>الفرع: ${selectedBranchName}</div>
-  <div>الوردية: ${selectedShiftLabel}</div>
+  <div>الوردية: ${selectedShiftName}</div>
   <div>عدد السجلات: ${formatNumberArabic(allOrders.length)}</div>
   <div>الإجمالي الكلي: ${formatCurrencyArabic(printTotalPrice)}</div>
 </div>
@@ -610,7 +644,7 @@ ${
   allOrders.length === 0
     ? `
   <div class="no-data">
-    <h3>لا توجد طلبات في الفترة المحددة</h3>
+    <h3>لا توجد طلبات في اليوم المحدد</h3>
   </div>
 `
     : `
@@ -765,23 +799,16 @@ ${
               </div>
             </div>
 
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-              dir="rtl"
-            >
-              {/* Start Date */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir="rtl">
+              {/* Day Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  من تاريخ
+                  اليوم
                 </label>
                 <div className="relative group">
-                  <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26] text-sm transition-all duration-300 group-focus-within:scale-110" />
                   <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    selectsStart
-                    startDate={startDate}
-                    endDate={endDate}
+                    selected={day}
+                    onChange={(date) => setDay(date)}
                     dateFormat="dd/MM/yyyy"
                     className={`w-full border ${
                       darkMode
@@ -789,102 +816,8 @@ ${
                         : "border-gray-200 bg-white text-black"
                     } rounded-lg sm:rounded-xl pl-10 pr-3 py-2.5 sm:py-3 outline-none focus:ring-2 focus:ring-[#E41E26] focus:border-transparent transition-all duration-200 text-sm sm:text-base`}
                     locale="ar"
-                    placeholderText="اختر تاريخ البداية"
+                    placeholderText="اختر اليوم"
                   />
-                </div>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  إلى تاريخ
-                </label>
-                <div className="relative group">
-                  <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26] text-sm transition-all duration-300 group-focus-within:scale-110" />
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    selectsEnd
-                    startDate={startDate}
-                    endDate={endDate}
-                    minDate={startDate}
-                    dateFormat="dd/MM/yyyy"
-                    className={`w-full border ${
-                      darkMode
-                        ? "border-gray-600 bg-gray-800 text-white"
-                        : "border-gray-200 bg-white text-black"
-                    } rounded-lg sm:rounded-xl pl-10 pr-3 py-2.5 sm:py-3 outline-none focus:ring-2 focus:ring-[#E41E26] focus:border-transparent transition-all duration-200 text-sm sm:text-base`}
-                    locale="ar"
-                    placeholderText="اختر تاريخ النهاية"
-                  />
-                </div>
-              </div>
-
-              {/* Shift Name Dropdown */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  اسم الوردية
-                </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => toggleDropdown("shift")}
-                    className={`w-full flex items-center justify-between border ${
-                      darkMode
-                        ? "border-gray-600 bg-gray-800 text-gray-300 hover:border-[#E41E26]"
-                        : "border-gray-200 bg-white text-gray-600 hover:border-[#E41E26]"
-                    } rounded-lg sm:rounded-xl px-3 py-2.5 sm:py-3 transition-all group text-sm sm:text-base`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <FaCalendar className="text-[#E41E26] text-sm" />
-                      <span>
-                        {shiftName
-                          ? shiftOptions.find((s) => s.value === shiftName)
-                              ?.label
-                          : "صباحي"}{" "}
-                      </span>
-                    </div>
-                    <motion.div
-                      animate={{
-                        rotate: openDropdown === "shift" ? 180 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <FaChevronDown className="text-[#E41E26]" />
-                    </motion.div>
-                  </button>
-                  <AnimatePresence>
-                    {openDropdown === "shift" && (
-                      <motion.ul
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -5 }}
-                        transition={{ duration: 0.2 }}
-                        className={`absolute z-10 mt-2 w-full ${
-                          darkMode
-                            ? "bg-gray-800 border-gray-600"
-                            : "bg-white border-gray-200"
-                        } border shadow-xl rounded-lg sm:rounded-xl overflow-hidden max-h-48 overflow-y-auto`}
-                      >
-                        {shiftOptions.map((option, index) => (
-                          <li
-                            key={index}
-                            onClick={() => {
-                              setShiftName(option.value);
-                              setOpenDropdown(null);
-                            }}
-                            className={`px-4 py-2.5 sm:py-3 ${
-                              darkMode
-                                ? "hover:bg-gray-700 text-gray-300 border-gray-600"
-                                : "hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] text-gray-700 border-gray-100"
-                            } cursor-pointer transition-all text-sm sm:text-base border-b last:border-b-0`}
-                          >
-                            {option.label}
-                          </li>
-                        ))}
-                      </motion.ul>
-                    )}
-                  </AnimatePresence>
                 </div>
               </div>
 
@@ -909,7 +842,7 @@ ${
                         {branchId
                           ? branches.find((b) => b.id === parseInt(branchId))
                               ?.name || "اختر الفرع"
-                          : "جميع الفروع"}
+                          : "اختر الفرع"}
                       </span>
                     </div>
                     <motion.div
@@ -934,19 +867,6 @@ ${
                             : "bg-white border-gray-200"
                         } border shadow-xl rounded-lg sm:rounded-xl overflow-hidden max-h-48 overflow-y-auto`}
                       >
-                        <li
-                          onClick={() => {
-                            setBranchId("");
-                            setOpenDropdown(null);
-                          }}
-                          className={`px-4 py-2.5 sm:py-3 ${
-                            darkMode
-                              ? "hover:bg-gray-700 text-gray-300 border-gray-600"
-                              : "hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] text-gray-700 border-gray-100"
-                          } cursor-pointer transition-all text-sm sm:text-base border-b`}
-                        >
-                          جميع الفروع
-                        </li>
                         {branches.map((branch) => (
                           <li
                             key={branch.id}
@@ -968,6 +888,86 @@ ${
                   </AnimatePresence>
                 </div>
               </div>
+
+              {/* Shift Name Dropdown */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  اسم الوردية
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => toggleDropdown("shift")}
+                    disabled={!day || !branchId || orderShifts.length === 0}
+                    className={`w-full flex items-center justify-between border ${
+                      darkMode
+                        ? "border-gray-600 bg-gray-800 text-gray-300 hover:border-[#E41E26]"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-[#E41E26]"
+                    } ${
+                      !day || !branchId || orderShifts.length === 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    } rounded-lg sm:rounded-xl px-3 py-2.5 sm:py-3 transition-all group text-sm sm:text-base`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FaCalendar className="text-[#E41E26] text-sm" />
+                      <span>
+                        {shiftId && orderShifts.length > 0
+                          ? orderShifts.find((s) => s.id === parseInt(shiftId))
+                              ?.name || "اختر الوردية"
+                          : day && branchId
+                          ? orderShifts.length === 0
+                            ? "لا توجد ورديات"
+                            : "اختر الوردية"
+                          : "اختر اليوم والفرع أولاً"}
+                      </span>
+                    </div>
+                    <motion.div
+                      animate={{
+                        rotate: openDropdown === "shift" ? 180 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FaChevronDown className="text-[#E41E26]" />
+                    </motion.div>
+                  </button>
+                  <AnimatePresence>
+                    {openDropdown === "shift" &&
+                      day &&
+                      branchId &&
+                      orderShifts.length > 0 && (
+                        <motion.ul
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.2 }}
+                          className={`absolute z-10 mt-2 w-full ${
+                            darkMode
+                              ? "bg-gray-800 border-gray-600"
+                              : "bg-white border-gray-200"
+                          } border shadow-xl rounded-lg sm:rounded-xl overflow-hidden max-h-48 overflow-y-auto`}
+                        >
+                          {orderShifts.map((shift, index) => (
+                            <li
+                              key={index}
+                              onClick={() => {
+                                setShiftId(shift.id.toString());
+                                setOpenDropdown(null);
+                              }}
+                              className={`px-4 py-2.5 sm:py-3 ${
+                                darkMode
+                                  ? "hover:bg-gray-700 text-gray-300 border-gray-600"
+                                  : "hover:bg-gradient-to-r hover:from-[#fff8e7] hover:to-[#ffe5b4] text-gray-700 border-gray-100"
+                              } cursor-pointer transition-all text-sm sm:text-base border-b last:border-b-0`}
+                            >
+                              {shift.name}
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -975,9 +975,9 @@ ${
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleFilter(1)}
-                disabled={!startDate || !endDate}
+                disabled={!day || !branchId}
                 className={`px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                  startDate && endDate
+                  day && branchId
                     ? "bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white cursor-pointer"
                     : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                 }`}
@@ -1181,7 +1181,7 @@ ${
                 لا توجد بيانات لعرضها
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                يرجى تحديد فترة زمنية وتطبيق الفلترة لعرض التقرير
+                يرجى تحديد اليوم والفرع وتطبيق الفلترة لعرض التقرير
               </p>
             </motion.div>
           )}
