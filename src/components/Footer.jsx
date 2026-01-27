@@ -263,7 +263,8 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm text-center" dir="rtl">
               © {currentYear} Chicken-One. جميع الحقوق محفوظة. | صنع بواسطة{" "}
-              <span className="text-[#E41E26]">مهند أشرف</span> في مصر
+              <span className="text-[#E41E26]">شركة TripleS للبرمجيات</span> في
+              مصر
             </p>
 
             <div className="flex gap-3">
