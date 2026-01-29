@@ -581,6 +581,8 @@ export default function Addresses() {
       if (location.state?.fromCart) {
         setTimeout(() => {
           Swal.fire({
+            background: "transparent",
+            showConfirmButton: false,
             allowOutsideClick: false,
             didOpen: () => {
               Swal.showLoading();
