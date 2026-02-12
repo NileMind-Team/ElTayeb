@@ -69,8 +69,8 @@ export default function Cart() {
   const [loadingProfile, setLoadingProfile] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [showPhoneInputModal, setShowPhoneInputModal] = useState(false); // New state for phone input modal
-  const [newPhoneNumber, setNewPhoneNumber] = useState(""); // New state for phone input
+  const [showPhoneInputModal, setShowPhoneInputModal] = useState(false);
+  const [newPhoneNumber, setNewPhoneNumber] = useState("");
 
   const notesModalRef = React.useRef(null);
   const productDetailsModalRef = React.useRef(null);
@@ -135,14 +135,71 @@ export default function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
-  // New function: Fetch user profile
+  useEffect(() => {
+    if (selectedBranch && cartItems.length > 0) {
+      const updatedItems = cartItems.map((item) => {
+        const basePrice = item.menuItem?.basePrice || 0;
+        const itemOffer = item.menuItem?.itemOffer;
+
+        const isOfferValidForBranch = checkIfOfferValidForBranch(
+          itemOffer,
+          selectedBranch?.id,
+        );
+
+        const priceAfterDiscount = calculatePriceAfterDiscount(
+          basePrice,
+          itemOffer,
+          isOfferValidForBranch,
+        );
+
+        const discountInMoney = calculateDiscountInMoney(
+          basePrice,
+          itemOffer,
+          isOfferValidForBranch,
+        );
+
+        const optionsTotal = calculateOptionsTotal(
+          item.menuItemOptions,
+          item.quantity,
+        );
+
+        const finalPrice = priceAfterDiscount;
+        const totalPrice = priceAfterDiscount * item.quantity + optionsTotal;
+
+        return {
+          ...item,
+          finalPrice: finalPrice,
+          totalPrice: totalPrice,
+          hasDiscount: isOfferValidForBranch,
+          discountValue: discountInMoney,
+          isPercentageDiscount: itemOffer?.isPercentage || false,
+          originalDiscountValue: itemOffer?.discountValue || 0,
+        };
+      });
+
+      setCartItems(updatedItems);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBranch]);
+
+  const checkIfOfferValidForBranch = (itemOffer, branchId) => {
+    if (!itemOffer || !itemOffer.isEnabled) return false;
+    if (!branchId) return false;
+
+    if (itemOffer.branches && Array.isArray(itemOffer.branches)) {
+      return itemOffer.branches.some((branch) => branch.branchId === branchId);
+    }
+
+    return false;
+  };
+
   const fetchUserProfile = async () => {
     try {
       setLoadingProfile(true);
       const response = await axiosInstance.get("/api/Account/Profile");
       setUserProfile(response.data);
       setPhoneNumber(response.data.phoneNumber || "");
-      setNewPhoneNumber(response.data.phoneNumber || ""); // Initialize new phone number
+      setNewPhoneNumber(response.data.phoneNumber || "");
     } catch (error) {
       console.error("Error fetching user profile:", error);
     } finally {
@@ -150,7 +207,6 @@ export default function Cart() {
     }
   };
 
-  // New function: Update phone number
   const updatePhoneNumber = async () => {
     try {
       if (!newPhoneNumber.trim()) {
@@ -177,9 +233,8 @@ export default function Cart() {
 
       setShowPhoneInputModal(false);
       setShowMissingInfoModal(false);
-      fetchUserProfile(); // Reload user data
+      fetchUserProfile();
 
-      // Try checkout again after updating phone
       setTimeout(() => {
         handleCheckout();
       }, 500);
@@ -195,15 +250,13 @@ export default function Cart() {
     }
   };
 
-  // Function to open phone input modal
   const openPhoneInputModal = () => {
-    setShowMissingInfoModal(false); // Close missing info modal
-    setShowPhoneInputModal(true); // Open phone input modal
+    setShowMissingInfoModal(false);
+    setShowPhoneInputModal(true);
   };
 
-  // Function to handle adding address
   const handleAddAddress = () => {
-    setShowMissingInfoModal(false); // Close missing info modal
+    setShowMissingInfoModal(false);
     navigate("/addresses", { state: { fromCart: true, requireDefault: true } });
   };
 
@@ -266,8 +319,12 @@ export default function Cart() {
     }
   };
 
-  const calculateDiscountInMoney = (basePrice, itemOffer) => {
-    if (!itemOffer || !itemOffer.isEnabled) return 0;
+  const calculateDiscountInMoney = (
+    basePrice,
+    itemOffer,
+    isOfferValid = true,
+  ) => {
+    if (!isOfferValid || !itemOffer || !itemOffer.isEnabled) return 0;
 
     if (itemOffer.isPercentage) {
       return (basePrice * itemOffer.discountValue) / 100;
@@ -276,8 +333,12 @@ export default function Cart() {
     }
   };
 
-  const calculatePriceAfterDiscount = (basePrice, itemOffer) => {
-    if (!itemOffer || !itemOffer.isEnabled) return basePrice;
+  const calculatePriceAfterDiscount = (
+    basePrice,
+    itemOffer,
+    isOfferValid = true,
+  ) => {
+    if (!isOfferValid || !itemOffer || !itemOffer.isEnabled) return basePrice;
 
     if (itemOffer.isPercentage) {
       return basePrice - (basePrice * itemOffer.discountValue) / 100;
@@ -316,12 +377,21 @@ export default function Cart() {
         const basePrice = item.menuItem?.basePrice || 0;
         const itemOffer = item.menuItem?.itemOffer;
 
+        const isOfferValidForBranch = selectedBranch
+          ? checkIfOfferValidForBranch(itemOffer, selectedBranch.id)
+          : false;
+
         const priceAfterDiscount = calculatePriceAfterDiscount(
           basePrice,
           itemOffer,
+          isOfferValidForBranch,
         );
 
-        const discountInMoney = calculateDiscountInMoney(basePrice, itemOffer);
+        const discountInMoney = calculateDiscountInMoney(
+          basePrice,
+          itemOffer,
+          isOfferValidForBranch,
+        );
 
         let prepTime = null;
         if (
@@ -356,7 +426,7 @@ export default function Cart() {
           menuItem: item.menuItem,
           menuItemOptions: item.menuItemOptions || [],
           note: item.note || "",
-          hasDiscount: itemOffer?.isEnabled || false,
+          hasDiscount: isOfferValidForBranch,
           discountValue: discountInMoney,
           originalDiscountValue: itemOffer?.discountValue || 0,
           isPercentageDiscount: itemOffer?.isPercentage || false,
@@ -566,10 +636,15 @@ export default function Cart() {
       );
     }
 
-    if (product.itemOffer?.isEnabled) {
+    const isOfferValidForBranch = selectedBranch
+      ? checkIfOfferValidForBranch(product.itemOffer, selectedBranch.id)
+      : false;
+
+    if (product.itemOffer?.isEnabled && isOfferValidForBranch) {
       const priceAfterDiscount = calculatePriceAfterDiscount(
         product.basePrice,
         product.itemOffer,
+        true,
       );
 
       return (
@@ -818,6 +893,10 @@ export default function Cart() {
 
     const basePrice = productDetails.basePrice || 0;
 
+    const isOfferValidForBranch = selectedBranch
+      ? checkIfOfferValidForBranch(productDetails.itemOffer, selectedBranch.id)
+      : false;
+
     if (basePrice === 0) {
       let total = 0;
 
@@ -838,6 +917,7 @@ export default function Cart() {
     const priceAfterDiscount = calculatePriceAfterDiscount(
       basePrice,
       productDetails.itemOffer,
+      isOfferValidForBranch,
     );
 
     let total = priceAfterDiscount * productQuantity;
@@ -1201,7 +1281,6 @@ export default function Cart() {
     }
 
     if (deliveryType === "delivery") {
-      // Case 2: User logged in but no addresses
       if (userAddresses.length === 0) {
         if (isMobile()) {
           toast.warning("يجب إضافة عنوان للتوصيل أولاً.", {
@@ -1224,7 +1303,6 @@ export default function Cart() {
         return;
       }
 
-      // Case 3: User logged in with addresses but none selected
       if (!selectedAddress) {
         if (isMobile()) {
           toast.warning("الرجاء اختيار عنوان التوصيل", {
@@ -1583,7 +1661,6 @@ export default function Cart() {
                     </p>
                   </div>
 
-                  {/* Add Phone Number Button */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -1603,7 +1680,6 @@ export default function Cart() {
                     </div>
                   </motion.button>
 
-                  {/* Add Address Button */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -1765,8 +1841,14 @@ export default function Cart() {
                         {formatPriceInModal(productDetails)}
                       </div>
 
+                      {/* Only show discount badge if offer is valid for selected branch */}
                       {productDetails.itemOffer?.isEnabled &&
-                        productDetails.basePrice !== 0 && (
+                        productDetails.basePrice !== 0 &&
+                        selectedBranch &&
+                        checkIfOfferValidForBranch(
+                          productDetails.itemOffer,
+                          selectedBranch.id,
+                        ) && (
                           <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg font-bold shadow text-xs sm:text-sm flex items-center gap-1">
                             <span>خصم</span>
                             <span>
@@ -1774,6 +1856,7 @@ export default function Cart() {
                                 calculateDiscountInMoney(
                                   productDetails.basePrice,
                                   productDetails.itemOffer,
+                                  true,
                                 ).toFixed(2),
                               )}{" "}
                               ج.م
@@ -1828,7 +1911,7 @@ export default function Cart() {
                   </div>
                 )}
 
-                {/* Addons - UPDATED DESIGN TO MATCH PRODUCT DETAILS PAGE */}
+                {/* Addons - عرض كل الإضافات بدون فلترة */}
                 {productAddons.length > 0 && (
                   <div className="space-y-3 sm:space-y-5 lg:space-y-6 mb-4 sm:mb-5 lg:mb-6">
                     {productAddons.map((addon) => {
@@ -2125,7 +2208,7 @@ export default function Cart() {
                                 loading="lazy"
                                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
                               />
-                              {/* Badge for discount */}
+                              {/* Badge for discount - only show if offer is valid for selected branch */}
                               {item.hasDiscount &&
                                 !item.isPriceBasedOnRequest && (
                                   <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
@@ -2166,7 +2249,7 @@ export default function Cart() {
                                 </div>
                               )}
 
-                              {/* Notes - New Section Added */}
+                              {/* Notes */}
                               {item.note && (
                                 <div className="flex items-start gap-2 text-xs sm:text-sm text-green-600 dark:text-green-400 mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">
                                   <FaStickyNote
