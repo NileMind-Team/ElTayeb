@@ -201,10 +201,10 @@ export default function ResetPassword() {
   return (
     <>
       <Helmet>
-        <title>Chicken One | تشيكن وان الزاوي</title>
+        <title>ElTayeb | الطيب</title>
         <meta
           name="description"
-          content="تشيكن ون - الزاوي مطعم عصري يقدم خدمة عالية الجودة وتجربة طعام مميزة، مع مذاق رائع واهتمام كبير برضا العملاء."
+          content="الطيب مطعم عصري يقدم خدمة عالية الجودة وتجربة طعام مميزة، مع مذاق رائع واهتمام كبير برضا العملاء."
         />
       </Helmet>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-4 relative font-sans overflow-hidden transition-colors duration-300">

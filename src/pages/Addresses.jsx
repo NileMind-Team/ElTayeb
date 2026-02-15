@@ -719,10 +719,10 @@ export default function Addresses() {
   return (
     <>
       <Helmet>
-        <title>Chicken One | تشيكن وان الزاوي</title>
+        <title>ElTayeb | الطيب</title>
         <meta
           name="description"
-          content="تشيكن ون - الزاوي مطعم عصري يقدم خدمة عالية الجودة وتجربة طعام مميزة، مع مذاق رائع واهتمام كبير برضا العملاء."
+          content="الطيب مطعم عصري يقدم خدمة عالية الجودة وتجربة طعام مميزة، مع مذاق رائع واهتمام كبير برضا العملاء."
         />
       </Helmet>
       <div

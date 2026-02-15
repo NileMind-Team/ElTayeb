@@ -50,11 +50,11 @@ const Footer = () => {
               <div className="flex items-center gap-3">
                 <img
                   src={logo}
-                  alt="Chicken One"
+                  alt="ElTayeb"
                   className="w-12 h-12 object-contain"
                 />
                 <span className="text-2xl font-bold bg-gradient-to-r from-[#E41E26] to-[#FDB913] bg-clip-text text-transparent">
-                  Chicken One
+                  ElTayeb
                 </span>
               </div>
             </Link>
@@ -169,7 +169,7 @@ const Footer = () => {
               className="text-gray-400 text-sm text-center flex flex-wrap items-center justify-center gap-2"
               dir="rtl"
             >
-              © {currentYear} Chicken-One. جميع الحقوق محفوظة. | صنع بواسطة{" "}
+              © {currentYear} ElTayeb. جميع الحقوق محفوظة. | صنع بواسطة{" "}
               <a
                 href="https://wa.me/201062485133"
                 target="_blank"
