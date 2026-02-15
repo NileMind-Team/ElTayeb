@@ -61,6 +61,21 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     { Icon: PiStarFourFill, delay: 1.8, top: "25%", right: "10%", size: 12 },
   ];
 
+  const ramadanGarland = [
+    { Icon: GiLanternFlame, delay: 0, size: 14, rotate: -5 },
+    { Icon: PiStarFourFill, delay: 0.2, size: 10, rotate: 10 },
+    { Icon: PiMoonStarsFill, delay: 0.4, size: 16, rotate: 0 },
+    { Icon: GiLanternFlame, delay: 0.6, size: 12, rotate: 8 },
+    { Icon: PiStarFourFill, delay: 0.8, size: 8, rotate: -10 },
+    { Icon: PiMoonStarsFill, delay: 1.0, size: 14, rotate: 5 },
+    { Icon: GiLanternFlame, delay: 1.2, size: 10, rotate: -8 },
+    { Icon: PiStarFourFill, delay: 1.4, size: 12, rotate: 12 },
+    { Icon: GiLanternFlame, delay: 1.6, size: 16, rotate: -5 },
+    { Icon: PiMoonStarsFill, delay: 1.8, size: 12, rotate: 7 },
+    { Icon: PiStarFourFill, delay: 2.0, size: 10, rotate: -12 },
+    { Icon: GiLanternFlame, delay: 2.2, size: 14, rotate: 5 },
+  ];
+
   const authLinks = [
     { path: "/login", label: "تسجيل الدخول" },
     { path: "/register", label: "إنشاء حساب" },
@@ -498,6 +513,52 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             <div className="hidden md:block absolute inset-0 -m-2 rounded-2xl bg-gradient-to-r from-[#5B2703] to-[#8B4513] pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
           </Link>
         </motion.div>
+
+        <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 w-[40%] md:w-[45%] lg:w-[50%] pointer-events-none">
+          <div className="relative flex justify-center items-center gap-1 md:gap-2">
+            <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#8B4513]/40 to-transparent -translate-y-3"></div>
+
+            <div className="flex justify-around items-center w-full gap-0.5 md:gap-1">
+              {ramadanGarland.map((item, index) => (
+                <motion.div
+                  key={`garland-${index}`}
+                  className="text-[#8B4513]/50 dark:text-[#8B4513]/60 hover:text-[#8B4513] dark:hover:text-[#8B4513] transition-colors duration-300"
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{
+                    opacity: [0.4, 0.8, 0.4],
+                    y: [-2, 2, -2],
+                    rotate: [item.rotate - 2, item.rotate + 2, item.rotate - 2],
+                  }}
+                  transition={{
+                    duration: 3,
+                    delay: item.delay,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  }}
+                  whileHover={{ scale: 1.2 }}
+                >
+                  <item.Icon size={item.size} />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* حبل الزينة السفلي */}
+            <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#8B4513]/30 to-transparent translate-y-3"></div>
+
+            {/* زوائد تزيينية على الحبل */}
+            <motion.div
+              className="absolute -top-1 left-0 w-1 h-1 rounded-full bg-[#8B4513]/30"
+              animate={{ opacity: [0.2, 0.5, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute -top-1 right-0 w-1 h-1 rounded-full bg-[#8B4513]/30"
+              animate={{ opacity: [0.2, 0.5, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+            />
+          </div>
+        </div>
 
         <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
           <motion.div
