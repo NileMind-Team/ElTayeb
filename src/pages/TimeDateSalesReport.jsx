@@ -261,7 +261,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
         className="relative bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#E41E26] to-[#FDB913] p-6 relative">
+        <div className="bg-gradient-to-r from-[#5B2703] to-[#8B4513] p-6 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
@@ -287,7 +287,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-4">
-                <FaUser className="text-[#E41E26]" />
+                <FaUser className="text-[#5B2703]" />
                 <h3 className="font-bold text-gray-800 dark:text-white">
                   معلومات العميل
                 </h3>
@@ -314,7 +314,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
 
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-4">
-                <FaMapMarkerAlt className="text-[#E41E26]" />
+                <FaMapMarkerAlt className="text-[#5B2703]" />
                 <h3 className="font-bold text-gray-800 dark:text-white">
                   معلومات التوصيل
                 </h3>
@@ -359,7 +359,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
 
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <FaBox className="text-[#E41E26]" />
+              <FaBox className="text-[#5B2703]" />
               <h3 className="font-bold text-gray-800 dark:text-white">
                 المنتجات المطلوبة
               </h3>
@@ -459,7 +459,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                               </p>
                               <p className="font-bold text-lg text-green-600 dark:text-green-400">
                                 {isPriceBasedOnRequest ? (
-                                  <span className="text-[#E41E26] dark:text-[#FDB913]">
+                                  <span className="text-[#5B2703] dark:text-[#8B4513]">
                                     السعر حسب الطلب
                                   </span>
                                 ) : (
@@ -536,7 +536,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                                   الإجمالي النهائي للمنتج
                                 </p>
-                                <p className="text-lg font-bold text-[#E41E26] dark:text-[#FDB913]">
+                                <p className="text-lg font-bold text-[#5B2703] dark:text-[#8B4513]">
                                   {itemFinalPrice.toFixed(2)} ج.م
                                 </p>
                               </div>
@@ -580,7 +580,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                   المبلغ النهائي
                 </p>
-                <p className="text-xl font-bold text-[#E41E26] dark:text-[#FDB913]">
+                <p className="text-xl font-bold text-[#5B2703] dark:text-[#8B4513]">
                   {order.totalWithFee?.toFixed(2) || "0.00"} ج.م
                 </p>
               </div>
@@ -674,6 +674,7 @@ const TimeDateSalesReport = () => {
           text: "فشل في تحميل قائمة الفروع",
           timer: 2000,
           showConfirmButton: false,
+          confirmButtonColor: "#5B2703",
         });
       }
     }
@@ -696,6 +697,7 @@ const TimeDateSalesReport = () => {
             showConfirmButton: false,
             background: "#fff",
             color: "#333",
+            confirmButtonColor: "#5B2703",
           });
         }
       }
@@ -716,6 +718,7 @@ const TimeDateSalesReport = () => {
             text: "تاريخ البداية يجب أن يكون قبل تاريخ النهاية",
             timer: 3000,
             showConfirmButton: false,
+            confirmButtonColor: "#5B2703",
           });
         }
       }
@@ -833,6 +836,7 @@ const TimeDateSalesReport = () => {
               title: "تم تطبيق الفلترة بنجاح",
               timer: 1500,
               showConfirmButton: false,
+              confirmButtonColor: "#5B2703",
             });
           }
         }, 500);
@@ -863,6 +867,7 @@ const TimeDateSalesReport = () => {
           text: errorMessage,
           timer: 2500,
           showConfirmButton: false,
+          confirmButtonColor: "#5B2703",
         });
       }
 
@@ -955,6 +960,7 @@ const TimeDateSalesReport = () => {
           text: "فشل في تحميل تفاصيل الطلب",
           timer: 2000,
           showConfirmButton: false,
+          confirmButtonColor: "#5B2703",
         });
       }
     } finally {
@@ -1020,6 +1026,7 @@ const TimeDateSalesReport = () => {
             text: "يرجى تحديد تاريخ البداية والنهاية أولاً",
             timer: 2000,
             showConfirmButton: false,
+            confirmButtonColor: "#5B2703",
           });
         }
         setIsPrinting(false);
@@ -1041,6 +1048,7 @@ const TimeDateSalesReport = () => {
             text: "لا توجد بيانات لعرضها في التقرير",
             timer: 2000,
             showConfirmButton: false,
+            confirmButtonColor: "#5B2703",
           });
         }
         setIsPrinting(false);
@@ -1476,6 +1484,7 @@ ${
           text: "فشل في تحميل بيانات الطباعة",
           timer: 2000,
           showConfirmButton: false,
+          confirmButtonColor: "#5B2703",
         });
       }
       setIsPrinting(false);
@@ -1545,8 +1554,8 @@ ${
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-4">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#E41E26]"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-[#fdf3e8] to-[#f5e1d0] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-4">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#5B2703]"></div>
       </div>
     );
   }
@@ -1562,12 +1571,12 @@ ${
       </Helmet>
       <div
         dir="rtl"
-        className="min-h-screen bg-gradient-to-br from-white via-[#fff8e7] to-[#ffe5b4] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-3 sm:px-4 md:px-6 py-6 relative font-sans overflow-hidden transition-colors duration-300"
+        className="min-h-screen bg-gradient-to-br from-white via-[#fdf3e8] to-[#f5e1d0] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 px-3 sm:px-4 md:px-6 py-6 relative font-sans overflow-hidden transition-colors duration-300"
       >
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -left-10 -top-10 w-40 h-40 sm:w-60 sm:h-60 bg-gradient-to-r from-[#E41E26]/10 to-[#FDB913]/10 rounded-full blur-2xl animate-pulse"></div>
-          <div className="absolute -right-10 -bottom-10 w-40 h-40 sm:w-60 sm:h-60 bg-gradient-to-r from-[#FDB913]/10 to-[#E41E26]/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute -left-10 -top-10 w-40 h-40 sm:w-60 sm:h-60 bg-gradient-to-r from-[#5B2703]/10 to-[#8B4513]/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute -right-10 -bottom-10 w-40 h-40 sm:w-60 sm:h-60 bg-gradient-to-r from-[#8B4513]/10 to-[#5B2703]/10 rounded-full blur-2xl animate-pulse"></div>
         </div>
 
         <motion.div
@@ -1577,7 +1586,7 @@ ${
           className="max-w-7xl mx-auto bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl shadow-xl rounded-2xl sm:rounded-3xl border border-white/50 dark:border-gray-700/50 relative overflow-hidden transition-colors duration-300"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#E41E26] to-[#FDB913] px-6 py-8 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#5B2703] to-[#8B4513] px-6 py-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -1607,7 +1616,7 @@ ${
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2">
-                  <FaCalendar className="text-[#E41E26] text-xl" />
+                  <FaCalendar className="text-[#5B2703] text-xl" />
                   <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                     فلترة بالتاريخ والوقت
                   </h3>
@@ -1624,7 +1633,7 @@ ${
                     تاريخ من
                   </label>
                   <div className="relative">
-                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26]" />
+                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5B2703]" />
                     <DatePicker
                       selected={startDate}
                       onChange={(date) => setStartDate(date)}
@@ -1632,7 +1641,7 @@ ${
                       startDate={startDate}
                       endDate={endDate}
                       dateFormat="dd/MM/yyyy"
-                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#E41E26] focus:border-transparent outline-none text-right"
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#5B2703] focus:border-transparent outline-none text-right"
                       locale="ar"
                       placeholderText="اختر تاريخ البداية"
                     />
@@ -1644,12 +1653,12 @@ ${
                     وقت من
                   </label>
                   <div className="relative">
-                    <FaClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26]" />
+                    <FaClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5B2703]" />
                     <input
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#E41E26] focus:border-transparent outline-none text-right"
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#5B2703] focus:border-transparent outline-none text-right"
                     />
                   </div>
                 </div>
@@ -1659,7 +1668,7 @@ ${
                     تاريخ إلى
                   </label>
                   <div className="relative">
-                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26]" />
+                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5B2703]" />
                     <DatePicker
                       selected={endDate}
                       onChange={(date) => setEndDate(date)}
@@ -1668,7 +1677,7 @@ ${
                       endDate={endDate}
                       minDate={startDate}
                       dateFormat="dd/MM/yyyy"
-                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#E41E26] focus:border-transparent outline-none text-right"
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#5B2703] focus:border-transparent outline-none text-right"
                       locale="ar"
                       placeholderText="اختر تاريخ النهاية"
                     />
@@ -1680,12 +1689,12 @@ ${
                     وقت إلى
                   </label>
                   <div className="relative">
-                    <FaClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E41E26]" />
+                    <FaClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5B2703]" />
                     <input
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#E41E26] focus:border-transparent outline-none text-right"
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-[#5B2703] focus:border-transparent outline-none text-right"
                     />
                   </div>
                 </div>
@@ -1700,10 +1709,10 @@ ${
                       onClick={() =>
                         setBranchesDropdownOpen(!branchesDropdownOpen)
                       }
-                      className="w-full flex items-center justify-between border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg px-3 py-2.5 text-right focus:ring-2 focus:ring-[#E41E26] focus:border-transparent outline-none hover:border-[#E41E26] transition-all group"
+                      className="w-full flex items-center justify-between border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg px-3 py-2.5 text-right focus:ring-2 focus:ring-[#5B2703] focus:border-transparent outline-none hover:border-[#5B2703] transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <FaBuilding className="text-[#E41E26] text-sm" />
+                        <FaBuilding className="text-[#5B2703] text-sm" />
                         <span className="text-sm">
                           {selectedBranch ? selectedBranch.name : "جميع الفروع"}
                         </span>
@@ -1712,7 +1721,7 @@ ${
                         animate={{ rotate: branchesDropdownOpen ? 180 : 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <FaChevronDown className="text-[#E41E26]" />
+                        <FaChevronDown className="text-[#5B2703]" />
                       </motion.div>
                     </button>
 
@@ -1732,7 +1741,7 @@ ${
                             onClick={() => handleBranchSelect(branch)}
                             className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-all text-sm border-b dark:border-gray-600 last:border-b-0 ${
                               selectedBranch?.id === branch.id
-                                ? "bg-gradient-to-r from-[#fff8e7] to-[#ffe5b4] dark:from-gray-700 dark:to-gray-600"
+                                ? "bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-700 dark:to-gray-600"
                                 : ""
                             }`}
                           >
@@ -1761,7 +1770,7 @@ ${
                       disabled={!startDate || !endDate}
                       className={`flex-1 px-4 py-2.5 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
                         startDate && endDate
-                          ? "bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white cursor-pointer"
+                          ? "bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white cursor-pointer"
                           : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                       }`}
                     >
@@ -1782,7 +1791,7 @@ ${
                       >
                         {isPrinting ? (
                           <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-2"></div>
                             جاري الطباعة...
                           </>
                         ) : (
@@ -1807,7 +1816,7 @@ ${
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
               >
                 {/* Total Sales Card */}
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg">
+                <div className="bg-gradient-to-r from-[#5B2703] to-[#8B4513] rounded-2xl p-5 text-white shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-90">إجمالي المبيعات</p>
@@ -1878,7 +1887,7 @@ ${
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <FaChartBar className="text-[#E41E26] text-xl" />
+                    <FaChartBar className="text-[#5B2703] text-xl" />
                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                       المنتجات الأكثر مبيعاً
                     </h3>
@@ -1895,7 +1904,7 @@ ${
                       className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#E41E26] to-[#FDB913] flex items-center justify-center text-white font-bold">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#5B2703] to-[#8B4513] flex items-center justify-center text-white font-bold">
                           {index + 1}
                         </div>
                         <div>
@@ -1930,7 +1939,7 @@ ${
                   <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <FaListAlt className="text-[#E41E26] text-xl" />
+                        <FaListAlt className="text-[#5B2703] text-xl" />
                         <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                           تفاصيل الطلبات
                         </h3>
@@ -2014,7 +2023,7 @@ ${
                             <td className="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-400">
                               {getBranchName(order)}
                             </td>
-                            <td className="px-4 py-3 text-center font-bold text-[#E41E26] dark:text-[#FDB913]">
+                            <td className="px-4 py-3 text-center font-bold text-[#5B2703] dark:text-[#8B4513]">
                               {formatCurrency(order.totalWithFee)}
                             </td>
                             <td className="px-4 py-3 text-center">
@@ -2023,7 +2032,7 @@ ${
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleViewOrderDetails(order.id)}
                                 disabled={loadingDetails}
-                                className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 mx-auto"
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 mx-auto"
                               >
                                 {loadingDetails &&
                                 selectedOrder?.id === order.id ? (
@@ -2046,7 +2055,7 @@ ${
                             المجموع الكلي:
                           </td>
                           <td className="px-4 py-3 text-center">
-                            <span className="text-xl font-bold text-[#E41E26] dark:text-[#FDB913]">
+                            <span className="text-xl font-bold text-[#5B2703] dark:text-[#8B4513]">
                               {formatCurrency(summary?.totalSales || 0)}
                             </span>
                           </td>
@@ -2090,7 +2099,7 @@ ${
                                 onClick={() => handlePageChange(pageNum)}
                                 className={`px-3 sm:px-4 py-1 sm:py-2 rounded-xl font-semibold ${
                                   currentPage === pageNum
-                                    ? "bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white shadow-lg"
+                                    ? "bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white shadow-lg"
                                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
                                 }`}
                               >

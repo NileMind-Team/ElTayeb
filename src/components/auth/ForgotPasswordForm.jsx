@@ -16,7 +16,7 @@ export default function ForgotPasswordForm({
       className="space-y-6 max-w-md mx-auto w-full"
     >
       <div className="text-center mb-2">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-[#E41E26] to-[#FDB913] bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-[#5B2703] to-[#8B4513] bg-clip-text text-transparent">
           إعادة تعيين كلمة المرور
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
@@ -27,7 +27,7 @@ export default function ForgotPasswordForm({
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="relative group">
           <div className="absolute inset-y-0 right-0 flex items-center justify-center pr-4">
-            <FaEnvelope className="text-[#E41E26] dark:text-[#FDB913] text-lg transition-all duration-300 group-focus-within:scale-110" />
+            <FaEnvelope className="text-[#5B2703] dark:text-[#8B4513] text-lg transition-all duration-300 group-focus-within:scale-110" />
           </div>
           <input
             type="email"
@@ -35,7 +35,7 @@ export default function ForgotPasswordForm({
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="بريدك الإلكتروني المسجل"
-            className="w-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-xl pr-12 pl-4 py-3.5 outline-none focus:ring-2 focus:ring-[#E41E26] dark:focus:ring-[#FDB913] focus:border-transparent transition-all duration-200 group-hover:border-[#E41E26]/50 dark:group-hover:border-[#FDB913]/50 text-right"
+            className="w-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-xl pr-12 pl-4 py-3.5 outline-none focus:ring-2 focus:ring-[#5B2703] dark:focus:ring-[#8B4513] focus:border-transparent transition-all duration-200 group-hover:border-[#5B2703]/50 dark:group-hover:border-[#8B4513]/50 text-right"
           />
         </div>
 
@@ -45,7 +45,7 @@ export default function ForgotPasswordForm({
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={onBack}
-            className="flex-1 py-3.5 border-2 border-[#E41E26] dark:border-[#FDB913] text-[#E41E26] dark:text-[#FDB913] rounded-xl font-semibold hover:bg-[#E41E26] dark:hover:bg-[#FDB913] hover:text-white transition-all duration-300"
+            className="flex-1 py-3.5 border-2 border-[#5B2703] dark:border-[#8B4513] text-[#5B2703] dark:text-[#8B4513] rounded-xl font-semibold hover:bg-[#5B2703] dark:hover:bg-[#8B4513] hover:text-white transition-all duration-300"
           >
             رجوع
           </motion.button>
@@ -56,7 +56,7 @@ export default function ForgotPasswordForm({
             disabled={!email}
             className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden ${
               email
-                ? "bg-gradient-to-r from-[#E41E26] to-[#FDB913] text-white hover:shadow-xl hover:shadow-[#E41E26]/25 dark:hover:shadow-[#FDB913]/25"
+                ? "bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white hover:shadow-xl hover:shadow-[#5B2703]/25 dark:hover:shadow-[#8B4513]/25"
                 : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             }`}
           >

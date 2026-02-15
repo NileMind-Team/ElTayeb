@@ -631,7 +631,7 @@ export default function AuthPage() {
           />
         ) : isProcessingGoogle ? (
           <div className="flex flex-col items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#E41E26] dark:border-[#FDB913] mb-6"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#5B2703] dark:border-[#8B4513] mb-6"></div>
           </div>
         ) : waitingForConfirmation ? (
           <WaitingConfirmation
