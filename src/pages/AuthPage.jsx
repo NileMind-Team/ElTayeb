@@ -333,7 +333,7 @@ export default function AuthPage() {
   const handleGoogleLogin = async () => {
     try {
       const returnUrl = encodeURIComponent(`${window.location.origin}/auth`);
-      const tenant = "Chicken_One";
+      const tenant = "ElTayeeb";
 
       const googleAuthUrl = `https://restaurant-template.runasp.net/api/account/login/google?returnUrl=${returnUrl}&Tenant=${tenant}`;
 

@@ -509,12 +509,12 @@ export default function MyOrders() {
       },
     });
 
-    return response.data; // مثال: branch-1 أو orders
+    return response.data;
   };
 
   const connectSignalR = async () => {
     try {
-      const tenantName = "Chicken_One";
+      const tenantName = "ElTayeeb";
       const groupFromApi = await getOrderGroupName();
       const fullGroupName = `${tenantName}-${groupFromApi}`;
 
