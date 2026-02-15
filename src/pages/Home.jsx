@@ -20,6 +20,8 @@ import {
   FaPercent,
   FaCheck,
 } from "react-icons/fa";
+import { PiStarFourFill, PiMoonStarsFill } from "react-icons/pi";
+import { GiLanternFlame } from "react-icons/gi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import axiosInstance from "../api/axiosInstance";
@@ -27,6 +29,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import HeroSwipper from "./HeroSwipper";
 import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -72,6 +75,50 @@ const Home = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // زينة رمضان للخلفية الرئيسية - مكبرة ومتعددة
+  const backgroundRamadanDecorations = [
+    { Icon: GiLanternFlame, delay: 0, top: "5%", right: "2%", size: 60 },
+    { Icon: PiMoonStarsFill, delay: 0.3, top: "15%", left: "1%", size: 70 },
+    { Icon: PiStarFourFill, delay: 0.6, top: "25%", right: "5%", size: 45 },
+    { Icon: GiLanternFlame, delay: 0.9, bottom: "10%", left: "3%", size: 65 },
+    { Icon: PiStarFourFill, delay: 1.2, top: "40%", left: "8%", size: 40 },
+    { Icon: PiMoonStarsFill, delay: 1.5, bottom: "20%", right: "4%", size: 75 },
+    { Icon: GiLanternFlame, delay: 1.8, top: "60%", right: "7%", size: 55 },
+    { Icon: PiStarFourFill, delay: 2.1, bottom: "35%", left: "5%", size: 35 },
+    { Icon: GiLanternFlame, delay: 2.4, top: "75%", left: "9%", size: 50 },
+    { Icon: PiMoonStarsFill, delay: 2.7, top: "85%", right: "3%", size: 65 },
+    { Icon: PiStarFourFill, delay: 3.0, bottom: "45%", right: "10%", size: 40 },
+    { Icon: GiLanternFlame, delay: 3.3, bottom: "60%", left: "12%", size: 55 },
+    { Icon: PiStarFourFill, delay: 3.6, top: "50%", left: "15%", size: 30 },
+    { Icon: PiMoonStarsFill, delay: 3.9, bottom: "70%", right: "8%", size: 60 },
+    { Icon: GiLanternFlame, delay: 4.2, top: "30%", right: "12%", size: 50 },
+  ];
+
+  // زينة رمضان لمنطقة الكاتيجرز - مكبرة ومتعددة
+  const categoriesRamadanDecorations = [
+    { Icon: GiLanternFlame, delay: 0, top: "-20px", right: "-10px", size: 30 },
+    {
+      Icon: PiMoonStarsFill,
+      delay: 0.3,
+      bottom: "-20px",
+      left: "-5px",
+      size: 35,
+    },
+    { Icon: PiStarFourFill, delay: 0.6, top: "40%", right: "-15px", size: 25 },
+    { Icon: GiLanternFlame, delay: 0.9, top: "10%", left: "-10px", size: 28 },
+    { Icon: PiStarFourFill, delay: 1.2, bottom: "30%", left: "-8px", size: 22 },
+    { Icon: PiMoonStarsFill, delay: 1.5, top: "70%", right: "-12px", size: 32 },
+    {
+      Icon: GiLanternFlame,
+      delay: 1.8,
+      bottom: "-15px",
+      right: "15%",
+      size: 28,
+    },
+    { Icon: PiStarFourFill, delay: 2.1, top: "-15px", left: "20%", size: 24 },
+    { Icon: PiMoonStarsFill, delay: 2.4, bottom: "50%", right: "5%", size: 30 },
+  ];
 
   const isMobile = () => {
     return window.innerWidth <= 768;
@@ -1843,6 +1890,101 @@ const Home = () => {
       )}
 
       <div className="min-h-screen bg-gradient-to-br from-white via-[#fdf3e8] to-[#f5e1d0] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 font-sans relative overflow-x-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-[#fdf3e8] to-[#f5e1d0] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700"></div>
+
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-r from-[#5B2703]/10 to-[#8B4513]/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-r from-[#8B4513]/10 to-[#5B2703]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-[#5B2703]/5 to-[#8B4513]/5 rounded-full blur-3xl"></div>
+
+          {backgroundRamadanDecorations.map((item, index) => (
+            <motion.div
+              key={index}
+              className="absolute text-[#8B4513]/20 dark:text-[#8B4513]/30 z-0"
+              style={{
+                top: item.top,
+                left: item.left,
+                right: item.right,
+                bottom: item.bottom,
+              }}
+              initial={{ opacity: 0, scale: 0, rotate: -20 }}
+              animate={{
+                opacity: [0.2, 0.5, 0.2],
+                scale: [1, 1.2, 1],
+                rotate: [0, 8, -8, 0],
+              }}
+              transition={{
+                duration: 5,
+                delay: item.delay,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+            >
+              <item.Icon size={item.size} />
+            </motion.div>
+          ))}
+
+          <svg
+            className="absolute top-0 left-0 w-full h-full opacity-10 dark:opacity-20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <pattern
+                id="ramadan-home-pattern"
+                x="0"
+                y="0"
+                width="80"
+                height="80"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M40 15 L45 25 L55 25 L48 35 L52 45 L40 38 L28 45 L32 35 L25 25 L35 25 Z M40 10 L40 15"
+                  fill="none"
+                  stroke="#8B4513"
+                  strokeWidth="0.8"
+                />
+                <circle
+                  cx="40"
+                  cy="8"
+                  r="3"
+                  fill="none"
+                  stroke="#8B4513"
+                  strokeWidth="0.6"
+                />
+                <path
+                  d="M38 48 L42 48 L44 52 L36 52 Z"
+                  fill="none"
+                  stroke="#8B4513"
+                  strokeWidth="0.6"
+                />
+              </pattern>
+            </defs>
+            <rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="url(#ramadan-home-pattern)"
+            />
+          </svg>
+          <motion.div
+            className="absolute -bottom-10 -right-10 text-[#8B4513]/15 dark:text-[#8B4513]/25"
+            animate={{ rotate: [0, 15, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <PiMoonStarsFill size={150} />
+          </motion.div>
+
+          <motion.div
+            className="absolute -top-10 -left-10 text-[#8B4513]/15 dark:text-[#8B4513]/25"
+            animate={{ rotate: [0, -15, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <PiMoonStarsFill size={130} />
+          </motion.div>
+        </div>
+
         <div ref={topOfPageRef}></div>
 
         <HeroSwipper />
@@ -1851,7 +1993,67 @@ const Home = () => {
           ref={categoriesSectionRef}
           className="relative max-w-6xl mx-auto -mt-8 md:-mt-12 px-2 sm:px-4 z-20 w-full"
         >
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-3 md:p-4 relative w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-3 md:p-4 relative w-full overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {categoriesRamadanDecorations.map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="absolute text-[#8B4513]/30 dark:text-[#8B4513]/40 z-0"
+                  style={{
+                    top: item.top,
+                    left: item.left,
+                    right: item.right,
+                    bottom: item.bottom,
+                  }}
+                  initial={{ opacity: 0, scale: 0, rotate: -20 }}
+                  animate={{
+                    opacity: [0.2, 0.6, 0.2],
+                    scale: [1, 1.3, 1],
+                    rotate: [0, 10, -10, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    delay: item.delay,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  }}
+                >
+                  <item.Icon size={item.size} />
+                </motion.div>
+              ))}
+
+              <svg
+                className="absolute top-0 left-0 w-full h-full opacity-20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <pattern
+                    id="ramadan-categories-pattern"
+                    x="0"
+                    y="0"
+                    width="30"
+                    height="30"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M15 5 L18 13 L25 13 L20 19 L22 27 L15 22 L8 27 L10 19 L5 13 L12 13 Z"
+                      fill="none"
+                      stroke="#8B4513"
+                      strokeWidth="0.3"
+                    />
+                  </pattern>
+                </defs>
+                <rect
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                  fill="url(#ramadan-categories-pattern)"
+                />
+              </svg>
+            </div>
+
             <button
               onClick={() => scrollCategories("left")}
               className="absolute left-1 md:left-2 top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-full p-2 text-gray-600 dark:text-gray-300 hover:text-[#5B2703] z-10 shadow-lg"
@@ -1861,7 +2063,7 @@ const Home = () => {
 
             <div
               ref={categoriesContainerRef}
-              className="flex overflow-x-auto scrollbar-hide gap-2 md:gap-4 px-6 sm:px-8 cursor-grab active:cursor-grabbing select-none"
+              className="flex overflow-x-auto scrollbar-hide gap-2 md:gap-4 px-6 sm:px-8 cursor-grab active:cursor-grabbing select-none relative z-10"
               style={{
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
@@ -1885,7 +2087,7 @@ const Home = () => {
                       scrollToCategories();
                     }, 50);
                   }}
-                  className={`flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base ${
+                  className={`flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base relative overflow-hidden ${
                     selectedCategory === category.id
                       ? "bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white shadow-lg"
                       : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
