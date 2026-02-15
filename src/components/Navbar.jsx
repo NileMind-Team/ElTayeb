@@ -358,7 +358,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <>
-      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300 overflow-hidden">
+      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5B2703]/5 to-[#8B4513]/5 dark:from-[#8B4513]/10 dark:to-[#5B2703]/10"></div>
 
@@ -425,7 +425,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-2 sm:gap-3 relative z-10"
+          className="flex items-center gap-2 sm:gap-3"
         >
           <Link
             to="/"
@@ -499,7 +499,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           </Link>
         </motion.div>
 
-        <div className="flex items-center gap-4 sm:gap-6 md:gap-8 relative z-10">
+        <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
           <motion.div
             className="absolute -top-2 -left-2 text-[#8B4513]/50 dark:text-[#8B4513]/60"
             animate={{ rotate: [0, 10, -10, 0] }}
@@ -512,7 +512,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
-            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center relative"
+            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center"
             aria-label={
               darkMode
                 ? "التبديل إلى الوضع النهاري"
@@ -528,7 +528,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
           {isLoggedIn ? (
             <motion.div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer relative"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer"
               whileHover={{ scale: 1.05 }}
               onClick={() => setIsSidebarOpen(true)}
             >
@@ -561,7 +561,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           ) : (
             <div className="relative" ref={dropdownRef}>
               <motion.div
-                className="flex items-center gap-2 sm:gap-3 cursor-pointer relative group"
+                className="flex items-center gap-2 sm:gap-3 cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
@@ -595,7 +595,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                     className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-[#5B2703]/20 dark:border-gray-600 overflow-hidden z-50"
                   >
                     <div className="p-2">
-                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 relative">
+                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                         {/* زينة رمضانية صغيرة داخل القائمة المنسدلة */}
                         <motion.div
                           className="absolute -top-1 -right-1 text-[#8B4513]/30"
