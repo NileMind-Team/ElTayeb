@@ -27,6 +27,8 @@ import {
   FaClock,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { PiStarFourFill, PiMoonStarsFill } from "react-icons/pi";
+import { GiLanternFlame } from "react-icons/gi";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../api/axiosInstance";
@@ -47,6 +49,17 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const [isHoveringLogo, setIsHoveringLogo] = useState(false);
 
   const isLoggedIn = !!localStorage.getItem("token");
+
+  // زينة رمضان المتحركة
+  const ramadanDecorations = [
+    { Icon: GiLanternFlame, delay: 0, top: "10%", right: "20%", size: 20 },
+    { Icon: PiMoonStarsFill, delay: 0.3, top: "60%", left: "15%", size: 22 },
+    { Icon: PiStarFourFill, delay: 0.6, bottom: "20%", right: "25%", size: 16 },
+    { Icon: PiStarFourFill, delay: 0.9, top: "40%", left: "25%", size: 14 },
+    { Icon: GiLanternFlame, delay: 1.2, bottom: "30%", left: "10%", size: 18 },
+    { Icon: PiMoonStarsFill, delay: 1.5, top: "75%", right: "15%", size: 20 },
+    { Icon: PiStarFourFill, delay: 1.8, top: "25%", right: "10%", size: 12 },
+  ];
 
   const authLinks = [
     { path: "/login", label: "تسجيل الدخول" },
@@ -345,12 +358,74 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <>
-      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300">
+      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#5B2703]/5 to-[#8B4513]/5 dark:from-[#8B4513]/10 dark:to-[#5B2703]/10"></div>
+
+          {ramadanDecorations.map((item, index) => (
+            <motion.div
+              key={index}
+              className="absolute text-[#8B4513]/30 dark:text-[#8B4513]/40"
+              style={{
+                top: item.top,
+                left: item.left,
+                right: item.right,
+                bottom: item.bottom,
+              }}
+              initial={{ opacity: 0, scale: 0, rotate: -20 }}
+              animate={{
+                opacity: [0.2, 0.5, 0.2],
+                scale: [1, 1.2, 1],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{
+                duration: 4,
+                delay: item.delay,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+            >
+              <item.Icon size={item.size} />
+            </motion.div>
+          ))}
+
+          <svg
+            className="absolute top-0 left-0 w-full h-full opacity-10 dark:opacity-20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <pattern
+                id="ramadan-nav-pattern"
+                x="0"
+                y="0"
+                width="30"
+                height="30"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M15 3 L17 10 L23 10 L18 14 L21 21 L15 17 L9 21 L12 14 L7 10 L13 10 Z"
+                  fill="none"
+                  stroke="#8B4513"
+                  strokeWidth="0.3"
+                />
+              </pattern>
+            </defs>
+            <rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="url(#ramadan-nav-pattern)"
+            />
+          </svg>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-2 sm:gap-3"
+          className="flex items-center gap-2 sm:gap-3 relative z-10"
         >
           <Link
             to="/"
@@ -360,6 +435,14 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             aria-label="الرجوع إلى الصفحة الرئيسية"
             title="الرجوع إلى الصفحة الرئيسية"
           >
+            <motion.div
+              className="absolute -top-3 -right-3 text-[#8B4513] dark:text-[#8B4513] z-20"
+              animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              <PiStarFourFill size={14} />
+            </motion.div>
+
             {/* Logo Container */}
             <div className="relative">
               <img
@@ -367,6 +450,14 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 alt="ElTayeb logo"
                 className="w-14 h-12 object-contain transition-transform duration-300 group-hover:scale-105"
               />
+
+              <motion.div
+                className="absolute -bottom-2 -left-2 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity"
+                animate={{ y: [-2, 2, -2] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <GiLanternFlame size={12} />
+              </motion.div>
 
               {/* Home Icon on Small Screens - Inside Logo */}
               <div className="md:hidden absolute -top-1 -right-1 bg-[#5B2703] dark:bg-[#8B4513] rounded-full p-1 border-2 border-white dark:border-gray-900 shadow-sm">
@@ -408,12 +499,20 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           </Link>
         </motion.div>
 
-        <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+        <div className="flex items-center gap-4 sm:gap-6 md:gap-8 relative z-10">
+          <motion.div
+            className="absolute -top-2 -left-2 text-[#8B4513]/50 dark:text-[#8B4513]/60"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            <PiMoonStarsFill size={12} />
+          </motion.div>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
-            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center relative"
             aria-label={
               darkMode
                 ? "التبديل إلى الوضع النهاري"
@@ -429,10 +528,19 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
           {isLoggedIn ? (
             <motion.div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer relative"
               whileHover={{ scale: 1.05 }}
               onClick={() => setIsSidebarOpen(true)}
             >
+              {/* نجمة رمضانية تظهر عند التحويم */}
+              <motion.div
+                className="absolute -top-2 -right-2 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <PiStarFourFill size={10} />
+              </motion.div>
+
               <div className="flex items-center gap-2 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                 {userData.avatar ? (
                   <img
@@ -453,10 +561,19 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           ) : (
             <div className="relative" ref={dropdownRef}>
               <motion.div
-                className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+                className="flex items-center gap-2 sm:gap-3 cursor-pointer relative group"
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
+                {/* فانوس رمضاني صغير يظهر عند التحويم */}
+                <motion.div
+                  className="absolute -top-3 -left-3 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <GiLanternFlame size={14} />
+                </motion.div>
+
                 <div className="flex items-center gap-2 bg-gradient-to-r from-[#5B2703] to-[#8B4513] px-4 sm:px-6 py-2.5 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[#5B2703]/25 transition-all duration-300">
                   <span>ابدأ الآن</span>
                   <motion.div
@@ -478,7 +595,15 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                     className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-[#5B2703]/20 dark:border-gray-600 overflow-hidden z-50"
                   >
                     <div className="p-2">
-                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 relative">
+                        {/* زينة رمضانية صغيرة داخل القائمة المنسدلة */}
+                        <motion.div
+                          className="absolute -top-1 -right-1 text-[#8B4513]/30"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                        >
+                          <PiStarFourFill size={12} />
+                        </motion.div>
                         <p
                           className="text-sm text-gray-600 dark:text-gray-400 text-right"
                           dir="rtl"
@@ -522,6 +647,12 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             </div>
           )}
         </div>
+
+        {/* شريط علوي رمضاني رفيع */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#8B4513] to-transparent"></div>
+
+        {/* شريط سفلي رمضاني رفيع */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#8B4513]/50 to-transparent"></div>
       </nav>
 
       <AnimatePresence>
@@ -548,6 +679,31 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               }}
               className="fixed top-0 right-0 h-full w-full max-w-xs bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-l border-[#5B2703]/20 dark:border-gray-700 z-[70] overflow-y-auto transition-colors duration-300"
             >
+              {/* إضافة زينة رمضانية في السايد بار */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <motion.div
+                  className="absolute top-10 left-5 text-[#8B4513]/10 dark:text-[#8B4513]/20"
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 8, repeat: Infinity }}
+                >
+                  <PiMoonStarsFill size={40} />
+                </motion.div>
+                <motion.div
+                  className="absolute bottom-20 right-5 text-[#8B4513]/10 dark:text-[#8B4513]/20"
+                  animate={{ y: [-5, 5, -5] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <GiLanternFlame size={30} />
+                </motion.div>
+                <motion.div
+                  className="absolute top-40 right-10 text-[#8B4513]/10 dark:text-[#8B4513]/20"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <PiStarFourFill size={20} />
+                </motion.div>
+              </div>
+
               <div className="relative p-6 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -632,7 +788,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 </div>
               </div>
 
-              <div className="p-4">
+              <div className="relative p-4">
                 <div className="space-y-1">
                   <motion.div
                     whileHover={{ scale: 1.02, x: -4 }}
