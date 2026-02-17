@@ -373,7 +373,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <>
-      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300">
+      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300 overflow-x-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5B2703]/5 to-[#8B4513]/5 dark:from-[#8B4513]/10 dark:to-[#5B2703]/10"></div>
 
