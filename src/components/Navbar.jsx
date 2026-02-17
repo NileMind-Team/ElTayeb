@@ -50,14 +50,15 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   const isLoggedIn = !!localStorage.getItem("token");
 
+  // زينة رمضان المتحركة
   const ramadanDecorations = [
-    { Icon: GiLanternFlame, delay: 0, top: "10%", right: "5%", size: 20 },
-    { Icon: PiMoonStarsFill, delay: 0.3, top: "60%", left: "5%", size: 22 },
-    { Icon: PiStarFourFill, delay: 0.6, bottom: "20%", right: "10%", size: 16 },
-    { Icon: PiStarFourFill, delay: 0.9, top: "40%", left: "10%", size: 14 },
-    { Icon: GiLanternFlame, delay: 1.2, bottom: "30%", left: "5%", size: 18 },
-    { Icon: PiMoonStarsFill, delay: 1.5, top: "75%", right: "8%", size: 20 },
-    { Icon: PiStarFourFill, delay: 1.8, top: "25%", right: "5%", size: 12 },
+    { Icon: GiLanternFlame, delay: 0, top: "10%", right: "20%", size: 20 },
+    { Icon: PiMoonStarsFill, delay: 0.3, top: "60%", left: "15%", size: 22 },
+    { Icon: PiStarFourFill, delay: 0.6, bottom: "20%", right: "25%", size: 16 },
+    { Icon: PiStarFourFill, delay: 0.9, top: "40%", left: "25%", size: 14 },
+    { Icon: GiLanternFlame, delay: 1.2, bottom: "30%", left: "10%", size: 18 },
+    { Icon: PiMoonStarsFill, delay: 1.5, top: "75%", right: "15%", size: 20 },
+    { Icon: PiStarFourFill, delay: 1.8, top: "25%", right: "10%", size: 12 },
   ];
 
   const ramadanGarland = [
@@ -372,7 +373,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <>
-      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300 w-full overflow-x-hidden">
+      <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-lg py-4 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 border-b border-[#5B2703]/20 dark:border-gray-700 transition-colors duration-300">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5B2703]/5 to-[#8B4513]/5 dark:from-[#8B4513]/10 dark:to-[#5B2703]/10"></div>
 
@@ -385,7 +386,6 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 left: item.left,
                 right: item.right,
                 bottom: item.bottom,
-                maxWidth: "100vw",
               }}
               initial={{ opacity: 0, scale: 0, rotate: -20 }}
               animate={{
@@ -408,7 +408,6 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           <svg
             className="absolute top-0 left-0 w-full h-full opacity-10 dark:opacity-20"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ maxWidth: "100vw" }}
           >
             <defs>
               <pattern
@@ -441,7 +440,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-2 sm:gap-3 flex-shrink-0"
+          className="flex items-center gap-2 sm:gap-3"
         >
           <Link
             to="/"
@@ -460,7 +459,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             </motion.div>
 
             {/* Logo Container */}
-            <div className="relative flex-shrink-0">
+            <div className="relative">
               <img
                 src={darkMode ? logoDark : logo}
                 alt="ElTayeb logo"
@@ -481,29 +480,29 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               </div>
             </div>
 
-            <div className="flex flex-col items-start max-w-[150px] sm:max-w-[200px]">
+            <div className="flex flex-col items-start">
               {/* Title and Icon for Medium+ Screens */}
               <div className="flex items-center gap-2">
-                <h1 className="hidden md:block text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#5B2703] to-[#8B4513] bg-clip-text text-transparent dark:from-[#8B4513] dark:to-[#5B2703] transition-all duration-300 group-hover:from-[#8B4513] group-hover:to-[#5B2703] dark:group-hover:from-[#5B2703] dark:group-hover:to-[#8B4513] truncate">
+                <h1 className="hidden md:block text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#5B2703] to-[#8B4513] bg-clip-text text-transparent dark:from-[#8B4513] dark:to-[#5B2703] transition-all duration-300 group-hover:from-[#8B4513] group-hover:to-[#5B2703] dark:group-hover:from-[#5B2703] dark:group-hover:to-[#8B4513]">
                   ElTayeb
                 </h1>
 
                 {/* Home Icon for Medium+ Screens */}
-                <FaHome className="hidden md:block text-[#5B2703] dark:text-[#8B4513] text-sm transition-all duration-300 group-hover:text-[#8B4513] dark:group-hover:text-[#5B2703] flex-shrink-0" />
+                <FaHome className="hidden md:block text-[#5B2703] dark:text-[#8B4513] text-sm transition-all duration-300 group-hover:text-[#8B4513] dark:group-hover:text-[#5B2703]" />
               </div>
 
               {/* Home Indicator Text - All Screens */}
               <div className="flex items-center gap-1">
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 transition-all duration-300 group-hover:text-[#5B2703] dark:group-hover:text-[#8B4513] whitespace-nowrap">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 transition-all duration-300 group-hover:text-[#5B2703] dark:group-hover:text-[#8B4513]">
                   {/* Show Arrow on Small Screens, Home Icon on Medium+ */}
                   <span className="md:hidden flex items-center gap-1">
-                    <FaArrowLeft className="text-[10px] flex-shrink-0" />
+                    <FaArrowLeft className="text-[10px]" />
                     <span className="ml-1">الرئيسية</span>
                   </span>
 
                   {/* Full Text on Medium+ Screens */}
                   <span className="hidden md:flex items-center gap-1">
-                    <FaArrowLeft className="text-[10px] flex-shrink-0" />
+                    <FaArrowLeft className="text-[10px]" />
                     <span>الصفحة الرئيسية</span>
                   </span>
                 </p>
@@ -515,7 +514,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           </Link>
         </motion.div>
 
-        <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 w-[30%] md:w-[40%] lg:w-[45%] pointer-events-none hidden md:block">
+        <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 w-[40%] md:w-[45%] lg:w-[50%] pointer-events-none">
           <div className="relative flex justify-center items-center gap-1 md:gap-2">
             <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#8B4513]/40 to-transparent -translate-y-3"></div>
 
@@ -523,7 +522,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               {ramadanGarland.map((item, index) => (
                 <motion.div
                   key={`garland-${index}`}
-                  className="text-[#8B4513]/50 dark:text-[#8B4513]/60 hover:text-[#8B4513] dark:hover:text-[#8B4513] transition-colors duration-300 flex-shrink-0"
+                  className="text-[#8B4513]/50 dark:text-[#8B4513]/60 hover:text-[#8B4513] dark:hover:text-[#8B4513] transition-colors duration-300"
                   initial={{ opacity: 0, y: -5 }}
                   animate={{
                     opacity: [0.4, 0.8, 0.4],
@@ -561,9 +560,9 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 flex-shrink-0">
+        <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
           <motion.div
-            className="absolute -top-2 -left-2 text-[#8B4513]/50 dark:text-[#8B4513]/60 hidden md:block"
+            className="absolute -top-2 -left-2 text-[#8B4513]/50 dark:text-[#8B4513]/60"
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity }}
           >
@@ -574,7 +573,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
-            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center flex-shrink-0"
+            className="p-2.5 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 flex items-center justify-center"
             aria-label={
               darkMode
                 ? "التبديل إلى الوضع النهاري"
@@ -590,31 +589,32 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
           {isLoggedIn ? (
             <motion.div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer flex-shrink-0"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer"
               whileHover={{ scale: 1.05 }}
               onClick={() => setIsSidebarOpen(true)}
             >
+              {/* نجمة رمضانية تظهر عند التحويم */}
               <motion.div
-                className="absolute -top-2 -right-2 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"
+                className="absolute -top-2 -right-2 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity"
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <PiStarFourFill size={10} />
               </motion.div>
 
-              <div className="flex items-center gap-2 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 px-2 py-1.5 sm:px-3 sm:py-1.5 md:px-4 md:py-2 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300 max-w-[150px] sm:max-w-[180px]">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-800 dark:to-gray-700 px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-[#8B4513]/30 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                 {userData.avatar ? (
                   <img
                     src={userData.avatar}
                     alt="صورة المستخدم"
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-[#8B4513]/50 dark:border-gray-500 flex-shrink-0"
+                    className="w-8 h-8 rounded-full object-cover border border-[#8B4513]/50 dark:border-gray-500"
                   />
                 ) : (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#5B2703] text-white flex items-center justify-center font-semibold border border-[#8B4513]/50 dark:border-gray-500 flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#5B2703] text-white flex items-center justify-center font-semibold border border-[#8B4513]/50 dark:border-gray-500">
                     {getInitial(userData.firstName)}
                   </div>
                 )}
-                <span className="text-gray-700 dark:text-gray-200 font-medium text-sm sm:text-base truncate max-w-[60px] sm:max-w-[100px]">
+                <span className="text-gray-700 dark:text-gray-200 font-medium">
                   {userData.firstName || "مستخدم"}
                 </span>
               </div>
@@ -626,23 +626,22 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
+                {/* فانوس رمضاني صغير يظهر عند التحويم */}
                 <motion.div
-                  className="absolute -top-3 -left-3 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"
+                  className="absolute -top-3 -left-3 text-[#8B4513] dark:text-[#8B4513] opacity-0 group-hover:opacity-100 transition-opacity"
                   animate={{ y: [-2, 2, -2] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <GiLanternFlame size={14} />
                 </motion.div>
 
-                <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-[#5B2703] to-[#8B4513] px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[#5B2703]/25 transition-all duration-300">
-                  <span className="text-sm sm:text-base whitespace-nowrap">
-                    ابدأ الآن
-                  </span>
+                <div className="flex items-center gap-2 bg-gradient-to-r from-[#5B2703] to-[#8B4513] px-4 sm:px-6 py-2.5 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[#5B2703]/25 transition-all duration-300">
+                  <span>ابدأ الآن</span>
                   <motion.div
                     animate={{ rotate: isDropdownOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <FaChevronDown className="text-white text-xs sm:text-sm flex-shrink-0" />
+                    <FaChevronDown className="text-white text-sm" />
                   </motion.div>
                 </div>
               </motion.div>
@@ -654,10 +653,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 mt-2 w-48 sm:w-56 md:w-64 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-[#5B2703]/20 dark:border-gray-600 overflow-hidden z-50"
+                    className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-[#5B2703]/20 dark:border-gray-600 overflow-hidden z-50"
                   >
                     <div className="p-2">
-                      <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                         {/* زينة رمضانية صغيرة داخل القائمة المنسدلة */}
                         <motion.div
                           className="absolute -top-1 -right-1 text-[#8B4513]/30"
@@ -667,7 +666,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                           <PiStarFourFill size={12} />
                         </motion.div>
                         <p
-                          className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-right truncate"
+                          className="text-sm text-gray-600 dark:text-gray-400 text-right"
                           dir="rtl"
                         >
                           انضم إلى{" "}
@@ -676,7 +675,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                           </span>
                         </p>
                         <p
-                          className="font-semibold text-gray-800 dark:text-gray-200 text-right text-sm sm:text-base truncate"
+                          className="font-semibold text-gray-800 dark:text-gray-200 text-right"
                           dir="rtl"
                         >
                           ابدأ رحلتك
@@ -691,14 +690,14 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         >
                           <button
                             onClick={() => handleAuthClick(link.path)}
-                            className={`w-full text-right flex items-center justify-between gap-2 px-3 py-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fdf3e8] hover:to-[#f5e1d0] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-lg ${
+                            className={`w-full text-right flex items-center justify-between gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-[#fdf3e8] hover:to-[#f5e1d0] dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 font-medium rounded-lg ${
                               location.pathname === link.path
                                 ? "bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-700 dark:to-gray-600 text-[#5B2703] dark:text-[#8B4513]"
                                 : ""
                             }`}
                             dir="rtl"
                           >
-                            <span className="truncate">{link.label}</span>
+                            <span>{link.label}</span>
                           </button>
                         </motion.div>
                       ))}
@@ -710,8 +709,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           )}
         </div>
 
+        {/* شريط علوي رمضاني رفيع */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#8B4513] to-transparent"></div>
 
+        {/* شريط سفلي رمضاني رفيع */}
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#8B4513]/50 to-transparent"></div>
       </nav>
 
@@ -774,15 +775,15 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   <FaTimes className="text-[#5B2703] dark:text-[#8B4513] text-lg" />
                 </motion.button>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3">
                     {userData.avatar ? (
                       <img
                         src={userData.avatar}
                         alt="صورة المستخدم"
-                        className="w-12 h-12 rounded-full object-cover border-2 border-[#8B4513] dark:border-[#5B2703] flex-shrink-0"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-[#8B4513] dark:border-[#5B2703]"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-[#5B2703] text-white flex items-center justify-center font-semibold text-lg border-2 border-[#8B4513] dark:border-[#5B2703] flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-[#5B2703] text-white flex items-center justify-center font-semibold text-lg border-2 border-[#8B4513] dark:border-[#5B2703]">
                         {getInitial(userData.firstName)}
                       </div>
                     )}
@@ -800,7 +801,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                             className="flex flex-row items-center gap-1 bg-[#5B2703]/10 dark:bg-[#8B4513]/20 px-2 py-1 rounded-full"
                             dir="rtl"
                           >
-                            <FaUserShield className="text-[#5B2703] dark:text-[#8B4513] text-xs flex-shrink-0" />
+                            <FaUserShield className="text-[#5B2703] dark:text-[#8B4513] text-xs" />
                             <span className="text-xs text-[#5B2703] dark:text-[#8B4513] font-semibold truncate">
                               مدير
                             </span>
@@ -812,7 +813,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                             className="flex flex-row items-center gap-1 bg-green-500/10 dark:bg-green-500/20 px-2 py-1 rounded-full"
                             dir="rtl"
                           >
-                            <FaStore className="text-green-600 dark:text-green-400 text-xs flex-shrink-0" />
+                            <FaStore className="text-green-600 dark:text-green-400 text-xs" />
                             <span className="text-xs text-green-600 dark:text-green-400 font-semibold truncate">
                               مطعم
                             </span>
@@ -824,7 +825,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                             className="flex flex-row items-center gap-1 bg-blue-500/10 dark:bg-blue-500/20 px-2 py-1 rounded-full"
                             dir="rtl"
                           >
-                            <FaCodeBranch className="text-blue-600 dark:text-blue-400 text-xs flex-shrink-0" />
+                            <FaCodeBranch className="text-blue-600 dark:text-blue-400 text-xs" />
                             <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold truncate">
                               فرع
                             </span>
@@ -836,7 +837,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                             className="flex flex-row items-center gap-1 bg-purple-500/10 dark:bg-purple-500/20 px-2 py-1 rounded-full"
                             dir="rtl"
                           >
-                            <FaUserCircle className="text-purple-600 dark:text-purple-400 text-xs flex-shrink-0" />
+                            <FaUserCircle className="text-purple-600 dark:text-purple-400 text-xs" />
                             <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold truncate">
                               مستخدم
                             </span>
