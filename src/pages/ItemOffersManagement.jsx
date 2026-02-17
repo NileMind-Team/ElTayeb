@@ -350,7 +350,6 @@ export default function ItemOffersManagement() {
   const [totalPages, setTotalPages] = useState(1);
   // eslint-disable-next-line no-unused-vars
   const [pageSize, setPageSize] = useState(5);
-
   const selectedProductId = location.state?.selectedProductId || "";
   const selectedOfferId = location.state?.selectedOfferId || null;
 
