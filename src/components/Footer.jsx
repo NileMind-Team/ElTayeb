@@ -362,10 +362,8 @@ const Footer = () => {
         </motion.div>
       </div>
 
-      {/* الشريط السفلي الملون */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#5B2703] via-[#8B4513] to-[#5B2703]"></div>
 
-      {/* شريط علوي رمضاني رفيع */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#8B4513] to-transparent"></div>
     </footer>
   );
