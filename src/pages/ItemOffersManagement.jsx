@@ -379,6 +379,7 @@ export default function ItemOffersManagement() {
   const [totalPages, setTotalPages] = useState(1);
   // eslint-disable-next-line no-unused-vars
   const [pageSize, setPageSize] = useState(5);
+
   const selectedProductId = location.state?.selectedProductId || "";
   const selectedOfferId = location.state?.selectedOfferId || null;
 
@@ -479,6 +480,7 @@ export default function ItemOffersManagement() {
       }));
     }
   }, [selectedProductId]);
+
   useEffect(() => {
     if (isAdminOrRestaurantOrBranch) {
       fetchOffers(branches);
@@ -759,6 +761,7 @@ export default function ItemOffersManagement() {
       if (result.isConfirmed) {
         try {
           await axiosInstance.delete(`/api/ItemOffers/Delete/${id}`);
+
           setCurrentPage(1);
           fetchOffers();
           showMessage("success", "تم الحذف!", "تم حذف عرض العنصر.");
@@ -915,33 +918,23 @@ export default function ItemOffersManagement() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8"
+            className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
-            <div className="flex items-center gap-3 sm:gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(-1)}
-                className="bg-white/80 backdrop-blur-md rounded-full p-2 sm:p-3 text-[#5B2703] hover:bg-[#5B2703] hover:text-white transition-all duration-300 shadow-lg dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-[#5B2703]"
-              >
-                <FaArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </motion.button>
-              <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200">
-                  إدارة عروض العناصر
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-                  إنشاء وإدارة الخصومات الخاصة بالعناصر
-                </p>
-              </div>
-            </div>
-            <div className="text-right self-end sm:self-auto">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#5B2703]">
-                {offers.length} عرض
-              </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-                في الصفحة الحالية
-              </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(-1)}
+              className="bg-white/80 backdrop-blur-md rounded-full p-2 sm:p-3 text-[#5B2703] hover:bg-[#5B2703] hover:text-white transition-all duration-300 shadow-lg dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-[#5B2703]"
+            >
+              <FaArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            </motion.button>
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200">
+                إدارة عروض العناصر
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
+                إنشاء وإدارة الخصومات الخاصة بالعناصر
+              </p>
             </div>
           </motion.div>
 
@@ -991,12 +984,12 @@ export default function ItemOffersManagement() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-5 lg:p-6 hover:shadow-2xl transition-all duration-300 dark:bg-gray-800/90 ${
+                    className={`bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-5 lg:p-6 hover:shadow-2xl transition-all duration-300 dark:bg-gray-800/90 border-2 ${
                       offer.isEnabled &&
                       new Date(offer.startDate) <= new Date() &&
                       new Date(offer.endDate) >= new Date()
-                        ? "border-2 border-green-300 dark:border-green-700"
-                        : "border border-gray-200 dark:border-gray-600"
+                        ? "border-green-200 dark:border-green-800"
+                        : "border-gray-200/50 dark:border-gray-600"
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
@@ -1005,12 +998,16 @@ export default function ItemOffersManagement() {
                         <div className="flex items-start justify-between mb-3 sm:mb-4">
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                             <div
-                              className={`p-3 sm:p-4 bg-gradient-to-r from-[#fdf3e8] to-[#f5e1d0] dark:from-gray-700 dark:to-gray-600 rounded-xl sm:rounded-2xl border border-[#5B2703]/30 dark:border-gray-500 flex-shrink-0`}
+                              className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-r ${
+                                offer.isPercentage
+                                  ? "from-green-500/10 to-green-600/10 dark:from-green-500/20 dark:to-green-600/20"
+                                  : "from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20"
+                              } border ${getStatusColor(offer)} flex-shrink-0`}
                             >
                               {offer.isPercentage ? (
-                                <FaPercent className="text-[#5B2703] dark:text-[#8B4513] text-xl sm:text-2xl" />
+                                <FaPercent className="text-[#5B2703] text-lg sm:text-xl" />
                               ) : (
-                                <FaMoneyBillWave className="text-[#5B2703] dark:text-[#8B4513] text-xl sm:text-2xl" />
+                                <FaMoneyBillWave className="text-[#5B2703] text-lg sm:text-xl" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -1090,7 +1087,7 @@ export default function ItemOffersManagement() {
                                   <p className="font-bold text-blue-600 dark:text-blue-400 text-2xl">
                                     {offer.menuItem?.basePrice === 0 ? (
                                       <span className="text-[#5B2703] dark:text-[#8B4513] font-bold">
-                                        حسب الطلب
+                                        السعر حسب الطلب
                                       </span>
                                     ) : (
                                       `ج.م ${
@@ -1151,30 +1148,20 @@ export default function ItemOffersManagement() {
                           </div>
                           {offer.branchNames && offer.branchNames.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
-                              {offer.branchNames
-                                .slice(0, 2)
-                                .map((branchName, index) => (
-                                  <span
-                                    key={index}
-                                    className="px-3 py-1.5 bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white rounded-lg text-xs font-medium flex items-center gap-1"
-                                  >
-                                    <FaStore className="text-xs" />
-                                    {branchName}
-                                  </span>
-                                ))}
-                              {offer.branchNames.length > 2 && (
-                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs font-medium">
-                                  +{offer.branchNames.length - 2}
+                              {offer.branchNames.map((branchName, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1.5 bg-gradient-to-r from-[#5B2703] to-[#8B4513] text-white rounded-lg text-xs font-medium flex items-center gap-1"
+                                >
+                                  <FaStore className="text-xs" />
+                                  {branchName}
                                 </span>
-                              )}
+                              ))}
                             </div>
                           ) : (
-                            <div className="text-center py-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                              <FaStore className="mx-auto text-3xl text-gray-400 dark:text-gray-500 mb-2" />
-                              <p className="text-gray-600 dark:text-gray-400 font-medium">
-                                لم يتم تحديد فروع
-                              </p>
-                            </div>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              لم يتم تحديد فروع
+                            </p>
                           )}
                         </div>
 
@@ -1187,26 +1174,26 @@ export default function ItemOffersManagement() {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-col lg:flex-row gap-2 sm:gap-3 justify-end sm:justify-start mt-4 sm:mt-0">
+                      {/* Action Buttons - تعديل التنسيق ليكون مثل الكود الأول */}
+                      <div className="flex flex-row sm:flex-col lg:flex-row gap-1 sm:gap-2 justify-end sm:justify-start items-center mt-2 sm:mt-0">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={(e) => handleToggleActive(offer.id, e)}
-                          className={`flex items-center gap-2 px-4 py-2.5 ${
+                          className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 ${
                             offer.isEnabled
-                              ? "bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/50 dark:text-yellow-300 dark:hover:bg-yellow-800"
-                              : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-800"
-                          } rounded-lg transition-colors duration-200 text-sm font-medium flex-1 sm:flex-none justify-center`}
+                              ? "bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/50 dark:text-yellow-300 dark:hover:bg-yellow-800 border-yellow-200 dark:border-yellow-800"
+                              : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-800 border-green-200 dark:border-green-800"
+                          } rounded-lg transition-colors duration-200 text-xs sm:text-sm font-medium flex-1 sm:flex-none justify-center border`}
                         >
                           {offer.isEnabled ? (
                             <>
-                              <FaTimesCircle className="text-sm" />
+                              <FaTimesCircle className="text-xs sm:text-sm" />
                               <span className="whitespace-nowrap">تعطيل</span>
                             </>
                           ) : (
                             <>
-                              <FaCheckCircle className="text-sm" />
+                              <FaCheckCircle className="text-xs sm:text-sm" />
                               <span className="whitespace-nowrap">تفعيل</span>
                             </>
                           )}
@@ -1215,18 +1202,18 @@ export default function ItemOffersManagement() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleEdit(offer)}
-                          className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-800 rounded-lg transition-colors duration-200 text-sm font-medium flex-1 sm:flex-none justify-center"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-800 rounded-lg transition-colors duration-200 text-xs sm:text-sm font-medium flex-1 sm:flex-none justify-center border border-blue-200 dark:border-blue-800"
                         >
-                          <FaEdit className="text-sm" />
+                          <FaEdit className="text-xs sm:text-sm" />
                           <span className="whitespace-nowrap">تعديل</span>
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleDelete(offer.id)}
-                          className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-800 rounded-lg transition-colors duration-200 text-sm font-medium flex-1 sm:flex-none justify-center"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-800 rounded-lg transition-colors duration-200 text-xs sm:text-sm font-medium flex-1 sm:flex-none justify-center border border-red-200 dark:border-red-800"
                         >
-                          <FaTrash className="text-sm" />
+                          <FaTrash className="text-xs sm:text-sm" />
                           <span className="whitespace-nowrap">حذف</span>
                         </motion.button>
                       </div>
