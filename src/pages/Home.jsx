@@ -76,7 +76,6 @@ const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // زينة رمضان للخلفية الرئيسية - مكبرة ومتعددة
   const backgroundRamadanDecorations = [
     { Icon: GiLanternFlame, delay: 0, top: "5%", right: "2%", size: 60 },
     { Icon: PiMoonStarsFill, delay: 0.3, top: "15%", left: "1%", size: 70 },
@@ -95,7 +94,6 @@ const Home = () => {
     { Icon: GiLanternFlame, delay: 4.2, top: "30%", right: "12%", size: 50 },
   ];
 
-  // زينة رمضان لمنطقة الكاتيجرز - مكبرة ومتعددة
   const categoriesRamadanDecorations = [
     { Icon: GiLanternFlame, delay: 0, top: "-20px", right: "-10px", size: 30 },
     {
@@ -124,7 +122,10 @@ const Home = () => {
     return window.innerWidth <= 768;
   };
 
-  // Function to show notification based on device and content
+  const trimText = (text) => {
+    return text.trim();
+  };
+
   const showNotification = (type, title, text, options = {}) => {
     if (options.showConfirmButton || options.showCancelButton) {
       Swal.fire({
@@ -1029,7 +1030,9 @@ const Home = () => {
   };
 
   const handleSaveCategory = async () => {
-    if (!editingCategory.name.trim()) {
+    const trimmedName = trimText(editingCategory.name);
+
+    if (!trimmedName) {
       showNotification("error", "خطأ", "اسم التصنيف مطلوب", { timer: 2000 });
       return;
     }
@@ -1048,14 +1051,16 @@ const Home = () => {
       await axiosInstance.put(
         `/api/Categories/Update/${editingCategory.originalId}`,
         {
-          name: editingCategory.name,
+          name: trimmedName,
           isActive: editingCategory.isActive,
         },
       );
 
       setCategories(
         categories.map((cat) =>
-          cat.id === editingCategory.id ? { ...editingCategory } : cat,
+          cat.id === editingCategory.id
+            ? { ...editingCategory, name: trimmedName }
+            : cat,
         ),
       );
 
@@ -1070,7 +1075,9 @@ const Home = () => {
   };
 
   const handleAddCategory = async () => {
-    if (!newCategory.name.trim()) {
+    const trimmedName = trimText(newCategory.name);
+
+    if (!trimmedName) {
       showNotification("error", "خطأ", "اسم التصنيف مطلوب", { timer: 2000 });
       return;
     }
@@ -1078,7 +1085,7 @@ const Home = () => {
     try {
       const response = await axiosInstance.post("/api/Categories/Add", null, {
         params: {
-          Name: newCategory.name,
+          Name: trimmedName,
           IsActive: newCategory.isActive,
         },
       });
